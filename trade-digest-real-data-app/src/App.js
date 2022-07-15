@@ -133,11 +133,21 @@ function App() {
         <div className="wov-button-wrapper">
           <Text className="wov-button-id">{id}</Text>
           {isPaid ? (
-            <Tag borderRadius="none" bg="#DFF1EC" color="#2E5045">
+            <Tag
+              className="wov-tag"
+              borderRadius="none"
+              bg="#DFF1EC"
+              color="#2E5045"
+            >
               Paid
             </Tag>
           ) : (
-            <Tag borderRadius="none" bg="#F5F4FA" color="#27364F">
+            <Tag
+              className="wov-tag"
+              borderRadius="none"
+              bg="#F5F4FA"
+              color="#27364F"
+            >
               Open
             </Tag>
           )}
@@ -293,7 +303,7 @@ function App() {
       <Accordion allowMultiple>
         <AccordionItem>
           <CustomAccordionButton
-            id={wv_arr[0] === 1 ? "KER:WO:201986" : "KER:VPO:201986"}
+            id={wv_arr[0] === 1 ? "WO:201986" : "VPO:201986"}
             // id="KER:201986"
             loc="Jasper 1C | Lot 5"
             isPaid={isPaid}
@@ -306,7 +316,7 @@ function App() {
         </AccordionItem>
         <AccordionItem>
           <CustomAccordionButton
-            id={wv_arr[1] === 1 ? "KER:WO:201987" : "KER:VPO:201987"}
+            id={wv_arr[1] === 1 ? "WO:201987" : "VPO:201987"}
             loc="Jasper 1C | Lot 5"
             isPaid={isPaid}
           />
@@ -318,7 +328,7 @@ function App() {
         </AccordionItem>
         <AccordionItem>
           <CustomAccordionButton
-            id={wv_arr[2] === 1 ? "KER:WO:201988" : "KER:VPO:201988"}
+            id={wv_arr[2] === 1 ? "WO:201988" : "VPO:201988"}
             loc="Jasper 1C | Lot 5"
             isPaid={isPaid}
           />
@@ -330,7 +340,7 @@ function App() {
         </AccordionItem>
         <AccordionItem>
           <CustomAccordionButton
-            id={wv_arr[3] === 1 ? "KER:WO:201989" : "KER:VPO:201989"}
+            id={wv_arr[3] === 1 ? "WO:201989" : "VPO:201989"}
             loc="Jasper 1C | Lot 5"
             isPaid={isPaid}
           />
@@ -348,7 +358,7 @@ function App() {
       <div className="start-letter-wrapper">
         <Text id="start-letter-loc">{loc}</Text>
         <Text id="start-letter-date">Last Updated: {date}</Text>
-        <LinkBox className="punch-item-link">
+        <LinkBox className="start-letter-link">
           <LinkOverlay href={href} />
           <Icon as={FiExternalLink} w="17px" h="17px" />
         </LinkBox>

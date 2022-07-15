@@ -154,7 +154,7 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name }) => {
         {dev_name} | Lot {lot_code}
       </Text>
       <Text id="start-letter-date">Last Updated: {converted_updated_at}</Text>
-      <LinkBox className="punch-item-link">
+      <LinkBox className="start-letter-link">
         <LinkOverlay href={url_data.s3_document_download_url.download_url} />
         <Icon as={FiExternalLink} w="17px" h="17px" />
       </LinkBox>

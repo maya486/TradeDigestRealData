@@ -243,19 +243,27 @@
   font-weight: 333;
   font-size: 6px;
 }
-
+.wov-tag {
+  position: absolute;
+  left: 130px;
+}
 .wov-button-wrapper {
   display: flex;
   padding: 8px 0;
   width: 100%;
   align-items: center;
+  position: relative;
   color: #27364F;
 }
 .wov-button-loc {
-  padding: 0 0 0 50px;
+  /* padding: 0 0 0 50px; */
+  /* align-self: flex-end; */
+  position:absolute;
+  left: 240px;
 }
 .wov-button-id {
-  padding: 0 50px 0 0;
+  /* padding: 0 50px 0 0; */
+  /* position: absolute */
 }
 .wov-panel-wrapper, .mt-panel-wrapper {
   display: flex;
@@ -267,7 +275,7 @@
   /* background-color: #F2F0ED; */
 }
 .wov-panel-names, .wov-panel-info {
-  font-weight: 571;
+  font-weight: 700;
 }
 .wov-panel-names > p, .wov-panel-info > p {
   padding: 3px 16px 0 0;
@@ -292,26 +300,41 @@
   flex: 1;
 }
 
+.start-letter-link {
+  position: absolute;
+  left: 370px;
+}
+
 .start-letter-wrapper {
   background-color: #FBF9F6;
   padding: 17px;
   display: flex;
   font-size: 14px;
   align-items: center;
+  position: relative;
   border-bottom: 1px solid #DBDDE1;
 }
 #start-letter-loc {
   color: #3E4C63;
+  position: absolute;
 }
 
 #start-letter-date {
   color: #8D95A2;
-  flex: 1;
-  padding: 0 0 0 40px;
+  position: absolute;
+  left: 180px;
+  /* flex: 1;
+  padding: 0 0 0 40px; */
 }
 
 .mt-button-date {
-  padding: 0 30px;
+  /* padding: 0 30px; */
+  position: absolute;
+  left: 50px;
+}
+.mt-button-info {
+  position: absolute;
+  left: 170px;
 }
 
 .reward-item-wrapper {
