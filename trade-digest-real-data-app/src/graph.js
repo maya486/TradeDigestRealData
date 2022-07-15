@@ -133,7 +133,6 @@ const StartLetterDev = ({ dev_info }) => {
     />
   ));
 };
-
 const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name }) => {
   const {
     loading: url_loading,
@@ -148,11 +147,11 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name }) => {
     toDate(parseISO(updated_at)),
     "MM/dd/yyyy"
   );
-  //   console.log(converted_updated_at);
+  console.log(converted_updated_at);
   return (
     <div className="start-letter-wrapper">
       <Text id="start-letter-loc">
-        {dev_name}|Lot {lot_code}
+        {dev_name} | Lot {lot_code}
       </Text>
       <Text id="start-letter-date">Last Updated: {converted_updated_at}</Text>
       <LinkBox className="punch-item-link">

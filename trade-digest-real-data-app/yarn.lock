@@ -8225,6 +8225,11 @@ react-merge-refs@^1.1.0:
   resolved "https://registry.yarnpkg.com/react-merge-refs/-/react-merge-refs-1.1.0.tgz#73d88b892c6c68cbb7a66e0800faa374f4c38b06"
   integrity sha512-alTKsjEL0dKH/ru1Iyn7vliS2QRcBp9zZPGoWxUOvRGWPUYgjo+V01is7p04It6KhgrzhJGnIj9GgX8W4bZoCQ==
 
+react-native-beautiful-timeline@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-beautiful-timeline/-/react-native-beautiful-timeline-0.1.1.tgz#d70268238365034d58c522a62892cab5b184a2c7"
+  integrity sha512-9iVdM8u8W7kbPrl2Q73R1bgd8tj2Mc0Z4aBl0cBPMQlR/7qOp+E/h50LoL7lnBitmZd4C5draysdUnSNDVWWgA==
+
 react-refresh@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.11.0.tgz#77198b944733f0f1f1a90e791de4541f9f074046"
