@@ -81,7 +81,7 @@
 
 .App {
   border: 1px solid black;
-  width: 429px;
+  width: 410px;
   /* width: 1000px; */
   height: 680px;
   margin: auto;
@@ -110,7 +110,10 @@
   /* border: 1px solid red; */
   /* font-family:'Mosaic Sharp Semi Slab' ; */
 }
-
+.notifss {
+  max-height: 310px;
+  overflow:scroll
+}
 .notifs {
   margin: 18px 18px 32px;
   background-color: white; 
@@ -265,7 +268,7 @@
   /* padding: 0 50px 0 0; */
   /* position: absolute */
 }
-.wov-panel-wrapper, .mt-panel-wrapper {
+.wov-panel-wrapper {
   display: flex;
   font-size: 14px;
   color: #3E4C63;
@@ -286,11 +289,24 @@
 }
 
 .mt-panel-wrapper {
-  color: #27364F;
-  display: flex;
+  color: #3E4C63;
+  position:relative;
   font-size: 14px;
-  font-weight:333;
-  padding: 5px;
+  padding: 8px 0;
+  align-items: center;
+  /* height: 200px; */
+}
+.mt-panel-names {
+  font-weight:700;
+}
+.mt-panel-info {
+  font-weight: 350;
+  position:absolute;
+  left: 165px;
+  top: 8px;
+}
+.mt-panel-names > p, .mt-panel-info > p {
+  padding: 3px 0px 0 0;
 }
 #title {
   font-weight: 571;
@@ -302,7 +318,7 @@
 
 .start-letter-link {
   position: absolute;
-  left: 370px;
+  left: 360px;
 }
 
 .start-letter-wrapper {
