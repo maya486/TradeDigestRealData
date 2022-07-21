@@ -41,6 +41,8 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
+import { getAuth, signInAnonymously } from "firebase/auth";
+
 const date = "Fri Jun 10, 2022";
 const name = "Staple 3";
 export const CustomDivider = () => {
@@ -409,10 +411,17 @@ const TimelineItem = ({ name, loc, dates }) => {
   );
 };
 export function App() {
-  useEffect(async () => {
-    const result = await getSchedules();
-    console.log(result);
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      const auth = getAuth();
+      await signInAnonymously(auth);
+      const result = await getSchedules();
+      console.log({ result });
+    };
+
+    fetchSchedules();
   }, []);
+
   return (
     <ChakraProvider>
       <p id="real-data">Real Data</p>

@@ -1,15 +1,7 @@
-import {
-  getFirestore,
-  getDocs,
-  collection,
-  where,
-  query,
-  writeBatch,
-  doc,
-} from "firebase/compat/firestore";
-import * as firebase from "firebase/compat/app";
-// import { initializeApp } from "firebase/app";
-// import app from "./firebase";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
+import { getFirestore, collection, query, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_apiKey,
@@ -28,16 +20,21 @@ const createFirebaseApp = () => {
 const db = getFirestore(createFirebaseApp());
 
 export const getSchedules = async () => {
-  const scheduleRef = collection(db, "schedule");
-  const scheduleQuery = await query(scheduleRef);
+  try {
+    const scheduleRef = collection(db, "schedule");
+    const scheduleQuery = await query(scheduleRef);
 
-  const querySnapshot = await getDocs(scheduleQuery);
+    const querySnapshot = await getDocs(scheduleQuery);
 
-  const result = [];
+    const result = [];
 
-  querySnapshot.forEach((doc) => {
-    result.push(doc.data());
-  });
+    querySnapshot.forEach((doc) => {
+      result.push(doc.data());
+    });
 
-  return result;
+    return result;
+  } catch (err) {
+    console.log("err");
+    console.log(err);
+  }
 };
