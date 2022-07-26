@@ -687,6 +687,163 @@ export const Schedule = ({ date_start, date_end }) => {
     </>
   );
 };
+
+const GET_WO_APPROVAL_ID = gql`
+  query GetWOApprovalId(
+    $vendorId: Int!
+    $dateStart: timestamp
+    $dateEnd: timestamp
+  ) {
+    kernel_work_order_approval(
+      where: {
+        work_order: {
+          vendor_id: { _eq: $vendorId }
+          updated_at: { _gte: $dateStart, _lte: $dateEnd }
+        }
+      }
+    ) {
+      work_order_id
+    }
+  }
+`;
+export const SOWWOApprovals = () => {
+  const { loading, error, data } = useQuery(GET_WO_APPROVAL_ID, {
+    variables: {
+      vendorId: vendor_id,
+      dateStart: "2022-06-27",
+      dateEnd: "2022-12-25",
+    },
+  });
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error.message}</p>;
+  return data.kernel_work_order_approval.map((info) => (
+    <SOWWOId id={info.work_order_id} />
+  ));
+};
+const GET_WO_FROM_ID = gql`
+  query GetWOFromID($WOId: Int) {
+    kernel_work_order(where: { id: { _eq: $WOId } }) {
+      id
+      vendor_id
+      activity {
+        fs: field_schedule {
+          ho: house_order {
+            lot {
+              code: _code
+              development {
+                name
+              }
+            }
+            id
+          }
+        }
+        planned_duration
+        planned_end
+        planned_start
+        status
+      }
+      work_order_items(where: { amount: { _gt: "0" } }) {
+        amount
+        cost_type {
+          name
+          cost_category {
+            name
+          }
+        }
+      }
+      type
+      notes
+    }
+  }
+`;
+export const SOWWOId = ({ id }) => {
+  const { loading, error, data } = useQuery(GET_WO_FROM_ID, {
+    variables: {
+      WOId: id,
+    },
+  });
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error 0</p>;
+  // return <></>;
+  return data.kernel_work_order.map((info) => {
+    if (
+      info.activity === null ||
+      info.activity.fs === null ||
+      info.activity.fs.ho === null ||
+      info.activity.fs.ho.lot === null ||
+      info.work_order_items.length === 0
+    ) {
+      return <></>;
+    }
+
+    return <SOWWOPlanElevation info={info} />;
+  });
+};
+const SOWWOPlanElevation = ({ info }) => {
+  // console.log(wo_info.activity.fs.ho.id);
+
+  const { loading, error, data } = useQuery(GET_PLAN_ELEVATION, {
+    variables: { hoId: info.activity.fs.ho.id },
+  });
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error.message}</p>;
+  return (
+    <AccordionItem>
+      <h2>
+        <AccordionButton fontSize="14px">
+          <div className="wov-button-wrapper">
+            <Text className="wov-button-id">WO:{info.id}</Text>
+            <Tag
+              className="wov-tag"
+              borderRadius="none"
+              bg="#DFF1EC"
+              color="#2E5045"
+            >
+              Paid
+            </Tag>
+            <Text className="wov-button-loc">
+              {info.activity.fs.ho.lot.development.name} | Lot{" "}
+              {info.activity.fs.ho.lot.code}
+            </Text>
+          </div>
+          <AccordionIcon />
+        </AccordionButton>
+      </h2>
+      <AccordionPanel
+        bg="#F2F0ED"
+        css={{
+          margin: 0,
+          padding: "5px 20px",
+          borderTop: "1px solid #DBDDE1",
+        }}
+      >
+        <div className="wov-panel-wrapper">
+          <div className="wov-panel-names">
+            <p>Plan:</p>
+            <p>Elevation:</p>
+            <p>Item:</p>
+          </div>
+          <div className="wov-panel-info">
+            <p className="plan">
+              {data?.kernel_house_order_calculated[0]?.model_configuration
+                ?.model?.name || "-"}
+            </p>
+            <p className="elevation">
+              {data?.kernel_house_order_calculated[0]?.elevation_option_catalog
+                ?.name || "-"}
+            </p>
+            {info.work_order_items.map((lineitem) => (
+              <p className="lineitem" key={lineitem}>
+                {lineitem.cost_type.cost_category.name} -{" "}
+                {lineitem.cost_type.name}
+              </p>
+            ))}
+          </div>
+        </div>
+      </AccordionPanel>
+    </AccordionItem>
+  );
+};
 // function DisplayLocations({ vid }) {
 //   const {
 //     loading: url_loading,

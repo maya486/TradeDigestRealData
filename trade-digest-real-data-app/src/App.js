@@ -1,16 +1,21 @@
 import "./App.css";
-import { StartLetterData, WorkOrderData, Notifs, Schedule } from "./graph";
+import {
+  StartLetterData,
+  WorkOrderData,
+  Notifs,
+  SOWWOApprovals,
+} from "./graph";
 import { BiGift } from "react-icons/bi";
 import { FiExternalLink } from "react-icons/fi";
 import { TbCircleCheck } from "react-icons/tb";
 import { IoWarning } from "react-icons/io5";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   BsFillCheckCircleFill,
   BsExclamationCircle,
   BsThreeDots,
 } from "react-icons/bs";
-import { getSchedules } from "./firebase/test.js";
+import { getSchedules, GetWeekActivities } from "./firebase/test.js";
 import { RiTruckLine } from "react-icons/ri";
 import logo from "./images/logo.png";
 import {
@@ -415,12 +420,13 @@ export function App() {
     const fetchSchedules = async () => {
       const auth = getAuth();
       await signInAnonymously(auth);
-      const result = await getSchedules();
-      console.log({ result });
+      const fetchedActivities = await getSchedules();
+      setActivities(fetchedActivities);
     };
 
     fetchSchedules();
   }, []);
+  const [activities, setActivities] = useState([]);
 
   return (
     <ChakraProvider>
@@ -505,7 +511,7 @@ export function App() {
             <div id="timeline-line" />
           </div>
           <div className="timeline-wrapper">
-            <TimelineNode isRed={true} text="June 6, 2022" />
+            <TimelineNode isRed={true} text="Aug 1, 2022" />
             {/* <TimelineItem
               loc="Jasper 1C | Lot 5"
               dates="Mon - Wed"
@@ -516,9 +522,19 @@ export function App() {
               dates="Mon - Fri"
               name="Framing Siding"
             /> */}
-            <Schedule date_start="2022-06-06" date_end="2022-06-12" />
-            <TimelineNode text="June 13, 2022" />
-            <Schedule date_start="2022-06-13" date_end="2022-06-19" />
+            {/* <Schedule date_start="2022-06-06" date_end="2022-06-12" /> */}
+            <GetWeekActivities
+              activities={activities}
+              start_date={new Date(2022, 7, 1)}
+              end_date={new Date(2022, 7, 8)}
+            />
+            <TimelineNode text="Aug 8, 2022" />
+            <GetWeekActivities
+              activities={activities}
+              start_date={new Date(2022, 7, 8)}
+              end_date={new Date(2022, 7, 15)}
+            />
+            {/* <Schedule date_start="2022-06-13" date_end="2022-06-19" /> */}
             {/* <TimelineItem
               loc="Jasper 1C | Lot 6"
               dates="Mon - Wed"
@@ -529,7 +545,7 @@ export function App() {
               dates="Thu - Fri"
               name="Framing Crane"
             /> */}
-            <TimelineNode text="June 20, 2022" />
+            <TimelineNode text="Aug 15, 2022" />
           </div>
         </div>
         <ReportHeader text="Scope of Work" />
@@ -573,7 +589,11 @@ export function App() {
               <DemoAccordion isWO={false} wv_arr={[0, 0, 0, 0]} />
             </TabPanel>
             <TabPanel css={{ margin: 0, padding: 0 }}>
-              <DemoAccordion isPaid={true} wv_arr={[1, 0, 1, 0]} />
+              {/* <DemoAccordion isPaid={true} wv_arr={[1, 0, 1, 0]} /> */}
+
+              <Accordion allowMultiple>
+                <SOWWOApprovals />
+              </Accordion>
             </TabPanel>
           </TabPanels>
         </Tabs>
