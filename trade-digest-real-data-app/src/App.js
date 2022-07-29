@@ -56,6 +56,9 @@ export const CustomDivider = () => {
 const Subdivider = () => {
   return <div className="subdivider" />;
 };
+const BigDivider = () => {
+  return <div className="bigdivider" />;
+};
 export const CustomIcon = ({ type }) => {
   // eslint-disable-next-line default-case
   switch (type) {
@@ -109,9 +112,8 @@ const PunchItem = ({ name, details, href }) => {
 const ReportHeader = ({ text }) => {
   return (
     <div className="report-header">
-      <CustomDivider />
+      <BigDivider />
       <p className="report-header-title">{text}</p>
-      <CustomDivider />
     </div>
   );
 };
@@ -136,36 +138,32 @@ const CustomTab = ({ text }) => {
 };
 const WOVButton = ({ id, loc, isPaid }) => {
   return (
-    <>
-      <div className="wov-button-wrapper">
-        <Text className="wov-button-id">{id}</Text>
-        {isPaid ? (
-          <Tag
-            className="wov-tag"
-            borderRadius="none"
-            bg="#DFF1EC"
-            color="#2E5045"
-          >
-            Paid
-          </Tag>
-        ) : (
-          <Tag
-            className="wov-tag"
-            borderRadius="none"
-            bg="#F5F4FA"
-            color="#27364F"
-          >
-            Open
-          </Tag>
-        )}
-        {/* <Tag borderRadius="none" bg="#F5F4FA">
-            Open
-          </Tag> */}
+    <div className="wov-button-wrapper">
+      {isPaid ? (
+        <Tag
+          className="wov-tag"
+          borderRadius="none"
+          bg="#DFF1EC"
+          color="#2E5045"
+        >
+          Done
+        </Tag>
+      ) : (
+        <Tag
+          className="wov-tag"
+          borderRadius="none"
+          bg="#F5F4FA"
+          color="#27364F"
+        >
+          Open
+        </Tag>
+      )}
+      <div className="wov-button-text-wrapper">
+        <Text className="wov-button-id">KER:{id}</Text>
         <Text className="wov-button-loc">{loc}</Text>
-        <></>
       </div>
       <AccordionIcon />
-    </>
+    </div>
   );
 };
 const MTButton = ({ date, info, icon_type }) => {
@@ -257,11 +255,9 @@ const MTPanel = ({ code, quantity, id, lots, isDelivered, date }) => {
 const CustomAccordionPanel = ({ plan, item_list, elevation }) => {
   return (
     <AccordionPanel
-      bg="#F2F0ED"
       css={{
         margin: 0,
         padding: "5px 20px",
-        borderTop: "1px solid #DBDDE1",
       }}
     >
       <WOVPanel plan={plan} item_list={item_list} elevation={elevation} />
@@ -417,6 +413,21 @@ const TimelineItem = ({ name, loc, dates }) => {
 };
 export function App() {
   useEffect(() => {
+    document.querySelectorAll(".circlegraph").forEach((circlegraph) => {
+      let circles = circlegraph.querySelectorAll(".circleA, .circleB");
+      let angle = 360 - 90,
+        dangle = 360 / circles.length;
+      angle -= dangle;
+      for (let i = 0; i < circles.length; ++i) {
+        let circle = circles[i];
+        angle += dangle;
+        circle.style.transform = `rotate(${angle}deg) translate(${
+          circlegraph.clientWidth / 2
+        }px) rotate(-${angle}deg)`;
+      }
+    });
+  }, []);
+  useEffect(() => {
     const fetchSchedules = async () => {
       const auth = getAuth();
       await signInAnonymously(auth);
@@ -447,9 +458,10 @@ export function App() {
         </header>
         <CustomDivider />
         <p id="greeting">Hello, {name}!</p>
-        <Box className="notifs" boxShadow={"md"}>
-          {/* <p id="notif-header">Notifications (###)</p> */}
-          {/* <CustomDivider />
+        <ReportHeader text="Notifications" />
+        {/* <Box className="notifs"> */}
+        {/* <p id="notif-header">Notifications (###)</p> */}
+        {/* <CustomDivider />
           <NotifItem
             name="Work order has been updated"
             loc="KER:00264 | Jasper 1C | Lot 72"
@@ -463,40 +475,40 @@ export function App() {
             details="Approved by Cletus Caroland"
             icon_type="success"
           /> */}
-          {/* <div className="notifss">
+        {/* <div className="notifss">
             <WorkOrderApprovals />
             <WorkOrderUpdates />
             <DocData />
           </div> */}
-          <Notifs />
-        </Box>
-        <ReportHeader text="This Pay Period" />
+        <Notifs />
+        {/* </Box> */}
+        <ReportHeader text="Pay Period" />
         <div className="upp-wrapper">
-          <CircularProgress
-            id="circle-progress"
-            size="240px"
-            value={20}
-            thickness="7px"
-            color="#FC1E68"
-          />
+          <div className="circlegraph">
+            {[...Array(14)].map((x, i) => (
+              <div
+                className={`${i > 10 ? "circleB" : "circleA"}`}
+                key={i}
+              ></div>
+            ))}
+          </div>
           <div className="inner-progress-text">
             <Text id="countdown-text">4 Days</Text>
             <Text id="countdown-helper">Until Next Pay Run</Text>
           </div>
         </div>
-        <Text className="punch-items-text">
-          Remaining Punch Items to Check-off Work Orders:{" "}
-        </Text>
+        <Text className="subsection">Remaining Punch Items </Text>
         <Subdivider />
         <div className="punch-items-wrapper">
-          <Box className="punch-item-box" boxShadow={"lg"}>
+          <Box className="punch-item-box">
             <PunchItem
               name="Inspect footing for cracks"
               details="Jasper 1C | Lot 5"
               href="#"
             />
           </Box>
-          <Box className="punch-item-box" boxShadow={"lg"}>
+          <Subdivider />
+          <Box className="punch-item-box">
             <PunchItem
               name="Framing inspection failed, fix some anchor bolts"
               details="Jasper 1C | Lot 5"
@@ -504,6 +516,77 @@ export function App() {
             />
           </Box>
         </div>
+        <Text className="subsection">This Pay Period Work Orders</Text>
+        <Accordion allowMultiple className="wo-accordion">
+          <WorkOrderData />
+          <SOWWOApprovals />
+        </Accordion>
+        {/* <Accordion allowMultiple className="wo-accordion">
+          <AccordionItem>
+            <CustomAccordionButton
+              id="WO:441566"
+              loc="Jasper 1C | Lot 317"
+              isPaid={false}
+            />
+            <CustomAccordionPanel
+              plan="3020"
+              item_list={["Framing Labor - Framing Labor"]}
+              elevation="A"
+            />
+          </AccordionItem>
+          <AccordionItem>
+            <CustomAccordionButton
+              id="WO:441572"
+              loc="Jasper 1C | Lot 317"
+              isPaid={false}
+            />
+            <CustomAccordionPanel
+              plan="3020"
+              item_list={["Framing Labor - Siding Labor"]}
+              elevation="A"
+            />
+          </AccordionItem>
+          <AccordionItem>
+            <CustomAccordionButton
+              id="WO:442801"
+              loc="Jasper 1C | Lot 321"
+              isPaid={false}
+            />
+            <CustomAccordionPanel
+              plan="3020"
+              item_list={["Framing Labor - Framing Labor"]}
+              elevation="A"
+            />
+          </AccordionItem>
+          <AccordionItem>
+            <CustomAccordionButton
+              id="WO:442078"
+              loc="Jasper 1C | Lot 331"
+              isPaid={false}
+            />
+            <CustomAccordionPanel
+              plan="2672"
+              item_list={[
+                "Framing Labor - Framing Labor",
+                "Framing Labor - Framing Labor",
+                "Framing Labor - Framing Labor",
+              ]}
+              elevation="A"
+            />
+          </AccordionItem>
+          <AccordionItem>
+            <CustomAccordionButton
+              id="WO:442802"
+              loc="Jasper 1C | Lot 331"
+              isPaid={false}
+            />
+            <CustomAccordionPanel
+              plan="2672"
+              item_list={["Framing Labor - Siding Labor"]}
+              elevation="A"
+            />
+          </AccordionItem>
+        </Accordion> */}
         <Text id="schedule-title">Upcoming Schedule Items:</Text>
         <Subdivider />
         <div id="schedule-wrapper">

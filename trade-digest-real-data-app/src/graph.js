@@ -32,6 +32,7 @@ import {
   Stack,
   Spacer,
   VStack,
+  background,
 } from "@chakra-ui/react";
 import { CheckIcon, InfoIcon } from "@chakra-ui/icons";
 // import "react-dates/initialize";
@@ -118,7 +119,9 @@ const GET_DOC_UPDATES = gql`
       lot {
         development {
           name
+          id
         }
+        id
         code: _code
       }
       id
@@ -126,7 +129,7 @@ const GET_DOC_UPDATES = gql`
   }
 `;
 
-const vendor_id = 54;
+const vendor_id = 12417;
 export const StartLetterData = () => {
   const {
     loading: dev_loading,
@@ -138,7 +141,7 @@ export const StartLetterData = () => {
   if (dev_loading) return <p>Loading...</p>;
   if (dev_error) return <p>Error 0</p>;
   return dev_data.kernel_development_vendor_selection.map((dev_info) => (
-    <StartLetterDev dev_info={dev_info} />
+    <StartLetterDev key={dev_info.id} dev_info={dev_info} />
   ));
 };
 export const DocData = () => {
@@ -151,8 +154,10 @@ export const DocData = () => {
   });
   if (dev_loading) return <p>Loading...</p>;
   if (dev_error) return <p>{dev_error.message}</p>;
+  // console.log("docData");
+  // console.log(dev_data.kernel_development_vendor_selection.length);
   return dev_data.kernel_development_vendor_selection.map((dev_info) => (
-    <DocDev dev_info={dev_info} />
+    <DocDev key={dev_info.id} dev_info={dev_info} />
   ));
 };
 const DocDev = ({ dev_info }) => {
@@ -161,10 +166,13 @@ const DocDev = ({ dev_info }) => {
     error: doc_error,
     data: doc_data,
   } = useQuery(GET_DOC_UPDATES, {
-    variables: { date: "2022-04-01", devlopmentId: dev_info.development_id },
+    variables: { date: "2022-07-27", devlopmentId: dev_info.development_id },
   });
   if (doc_loading) return <p>Loading...</p>;
   if (doc_error) return <p>{doc_error.message}</p>;
+  console.log("docDev");
+  console.log(doc_data);
+  console.log(dev_info.development_id);
   return doc_data.kernel_delivery_document.map((doc_info) => {
     if (
       doc_info.lot === null ||
@@ -177,18 +185,19 @@ const DocDev = ({ dev_info }) => {
     }
     return (
       <>
+        <CustomDivider />
         <div className="notif-item">
           <CustomIcon type="warning" />
           <div className="notif-item-text">
             <p className="notif-name">Document has been updated</p>
+            <p className="notif-id">ID:{doc_info.id}</p>
             <p className="notif-loc">
-              ID:{doc_info.id} | {doc_info.lot.development.name} |{" "}
-              {doc_info.lot.code}
+              {doc_info.lot.development.name} | {doc_info.lot.code}
             </p>
             <p className="notif-details">{doc_info.filename}</p>
           </div>
+          <p className="notif-time">time</p>
         </div>
-        <CustomDivider />
       </>
     );
   });
@@ -219,9 +228,10 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name }) => {
     data: url_data,
   } = useQuery(GET_START_LETTER_URL, {
     variables: { url_id: sl_info.s3_document_id },
+    // variables: { url_id: 224 },
   });
   if (url_loading) return <p>Loading...</p>;
-  if (url_error) return <p>Error 2</p>;
+  if (url_error) return <p>Error 2 {url_error.message}</p>;
   const converted_updated_at = format(
     toDate(parseISO(updated_at)),
     "MM/dd/yyyy"
@@ -279,7 +289,7 @@ export const WorkOrderApprovals = () => {
     error: woa_error,
     data: woa_data,
   } = useQuery(GET_WO_APPROVALS, {
-    variables: { date: "2022-06-27", vendorId: vendor_id },
+    variables: { date: "2022-01-25", vendorId: vendor_id },
   });
   if (woa_loading) return <p>Loading...</p>;
   if (woa_error) return <p>{woa_error.message}</p>;
@@ -300,12 +310,13 @@ export const WorkOrderApprovals = () => {
         }
         return (
           <>
+            <CustomDivider />
             <div className="notif-item">
               <CustomIcon type="success" />
               <div className="notif-item-text">
                 <p className="notif-name">Work order has been approved</p>
+                <p className="notif-id">KER:{woa_info.work_order.id}</p>
                 <p className="notif-loc">
-                  KER:{woa_info.work_order.id} |{" "}
                   {woa_info.work_order.activity.fs.ho.lot.development.name} |{" "}
                   {woa_info.work_order.activity.fs.ho.lot.code}
                 </p>
@@ -316,9 +327,8 @@ export const WorkOrderApprovals = () => {
                   </p>
                 )}
               </div>
+              <p className="notif-time">time</p>
             </div>
-            <></>
-            <CustomDivider />
           </>
         );
       })}
@@ -350,17 +360,16 @@ const GET_WO_UPDATES = gql`
     }
   }
 `;
-export const WorkOrderUpdates = ({ incNum }) => {
+export const WorkOrderUpdates = () => {
   const {
     loading: wou_loading,
     error: wou_error,
     data: wou_data,
   } = useQuery(GET_WO_UPDATES, {
-    variables: { date: "2022-06-27", vendorId: vendor_id },
+    variables: { date: "2022-06-25", vendorId: vendor_id },
   });
   if (wou_loading) return <p>Loading...</p>;
   if (wou_error) return <p>{wou_error.message}</p>;
-  // incNum(1);
   return (
     <>
       {wou_data.kernel_work_order.map((wou_info) => {
@@ -375,19 +384,20 @@ export const WorkOrderUpdates = ({ incNum }) => {
         // incNum();
         return (
           <>
+            <CustomDivider />
             <div className="notif-item">
               <CustomIcon type="warning" />
               <div className="notif-item-text">
                 <p className="notif-name">Work order has been updated</p>
+                <p className="notif-id">KER:{wou_info.id}</p>
                 <p className="notif-loc">
-                  KER:{wou_info.id} |{" "}
                   {wou_info.activity.fs.ho.lot.development.name} |{" "}
                   {wou_info.activity.fs.ho.lot.code}
                 </p>
                 <p className="notif-details">{wou_info.notes}</p>
               </div>
+              <p className="notif-time">time</p>
             </div>
-            <CustomDivider />
           </>
         );
       })}
@@ -395,19 +405,12 @@ export const WorkOrderUpdates = ({ incNum }) => {
   );
 };
 export const Notifs = () => {
-  const [num, setNum] = useState(0);
-  const incNum = (added) => {
-    setNum(num + added);
-  };
   return (
-    <>
-      <p id="notif-header">Notifications ({num})</p>
-      <div className="notifss">
-        <WorkOrderApprovals />
-        <WorkOrderUpdates incNum={incNum} />
-        <DocData />
-      </div>
-    </>
+    <div className="notifs">
+      <WorkOrderUpdates />
+      <WorkOrderApprovals />
+      <DocData />
+    </div>
   );
 };
 
@@ -419,9 +422,7 @@ const GET_WO = gql`
           {
             activity: {
               status: { _eq: Scheduled }
-              _and: {
-                planned_start: { _lte: "2022-12-25", _gte: "2022-01-13" }
-              }
+              _and: { planned_start: { _lte: "2022-08-3", _gte: "2022-07-27" } }
             }
           }
           { activity: { status: { _eq: Started } } }
@@ -519,11 +520,10 @@ const WorkOrderHO = ({ wo_info }) => {
   if (ho_loading) return <p>Loading...</p>;
   if (ho_error) return <p>{ho_error.message}</p>;
   return (
-    <AccordionItem>
+    <AccordionItem borderBottom="none">
       <h2>
         <AccordionButton fontSize="14px">
           <div className="wov-button-wrapper">
-            <Text className="wov-button-id">WO:{wo_info.id}</Text>
             <Tag
               className="wov-tag"
               borderRadius="none"
@@ -532,21 +532,21 @@ const WorkOrderHO = ({ wo_info }) => {
             >
               Open
             </Tag>
-            <Text className="wov-button-loc">
-              {wo_info.activity.fs.ho.lot.development.name} | Lot{" "}
-              {wo_info.activity.fs.ho.lot.code}
-            </Text>
-            <></>
+            <div className="wov-button-text-wrapper">
+              <Text className="wov-button-id">KER:WO:{wo_info.id}</Text>
+              <Text className="wov-button-loc">
+                {wo_info.activity.fs.ho.lot.development.name} | Lot{" "}
+                {wo_info.activity.fs.ho.lot.code}
+              </Text>
+            </div>
           </div>
           <AccordionIcon />
         </AccordionButton>
       </h2>
       <AccordionPanel
-        bg="#F2F0ED"
         css={{
           margin: 0,
           padding: "5px 20px",
-          borderTop: "1px solid #DBDDE1",
         }}
       >
         <div className="wov-panel-wrapper">
@@ -788,33 +788,33 @@ const SOWWOPlanElevation = ({ info }) => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
   return (
-    <AccordionItem>
+    <AccordionItem borderBottom="none">
       <h2>
         <AccordionButton fontSize="14px">
           <div className="wov-button-wrapper">
-            <Text className="wov-button-id">WO:{info.id}</Text>
             <Tag
               className="wov-tag"
               borderRadius="none"
               bg="#DFF1EC"
               color="#2E5045"
             >
-              Paid
+              Done
             </Tag>
-            <Text className="wov-button-loc">
-              {info.activity.fs.ho.lot.development.name} | Lot{" "}
-              {info.activity.fs.ho.lot.code}
-            </Text>
+            <div className="wov-button-text-wrapper">
+              <Text className="wov-button-id">WO:{info.id}</Text>
+              <Text className="wov-button-loc">
+                {info.activity.fs.ho.lot.development.name} | Lot{" "}
+                {info.activity.fs.ho.lot.code}
+              </Text>
+            </div>
+            <AccordionIcon />
           </div>
-          <AccordionIcon />
         </AccordionButton>
       </h2>
       <AccordionPanel
-        bg="#F2F0ED"
         css={{
           margin: 0,
           padding: "5px 20px",
-          borderTop: "1px solid #DBDDE1",
         }}
       >
         <div className="wov-panel-wrapper">
