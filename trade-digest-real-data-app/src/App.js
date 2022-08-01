@@ -68,28 +68,30 @@ export const CustomIcon = ({ type }) => {
       return (
         <Icon as={BsFillCheckCircleFill} w="16px" h="16px" color="#31A881" />
       );
-    case "delivered":
+    case "Delivered":
       return <Icon as={TbCircleCheck} w="16px" h="16px" color="#3E4C63" />;
-    case "delayed":
+    case "Delayed":
       return (
         <Icon as={BsExclamationCircle} w="16px" h="16px" color="#3E4C63" />
       );
-    case "order-placed":
+    case "Order Placed":
       return <Icon as={BsThreeDots} w="16px" h="16px" color="#3E4C63" />;
-    case "on-the-way":
+    case "On The Way":
       return <Icon as={RiTruckLine} w="16px" h="16px" color="#3E4C63" />;
   }
   return <Icon as={TbCircleCheck} w="16px" h="16px" color="black" />;
 };
-const NotifItem = ({ name, loc, details, icon_type }) => {
+const NotifItem = ({ name, loc, details, icon_type, time, id }) => {
   return (
     <div className="notif-item">
       <CustomIcon type={icon_type} />
       <div className="notif-item-text">
         <p className="notif-name">{name}</p>
+        <p className="notif-id">{id}</p>
         <p className="notif-loc">{loc}</p>
         <p className="notif-details">{details}</p>
       </div>
+      <p className="notif-time">{time}</p>
     </div>
   );
 };
@@ -121,15 +123,21 @@ const CustomTab = ({ text }) => {
   return (
     <Tab
       className="tab"
+      color="#04203E"
+      width="50%"
+      fontWeight="700"
+      // height="30px"
+      // borderRadius="15px"
+      borderRadius="inherit"
       _active={{
-        color: "#27364F",
-        fontWeight: "700",
-        borderBottom: "2px solid #27364F",
+        backgroundColor: "white",
+        // borderRadius: "15px",
+        borderRadius: "inherit",
       }}
       _selected={{
-        color: "#27364F",
-        fontWeight: "700",
-        borderBottom: "2px solid #27364F",
+        backgroundColor: "white",
+        // borderRadius: "15px",
+        borderRadius: "inherit",
       }}
     >
       {text}
@@ -166,20 +174,19 @@ const WOVButton = ({ id, loc, isPaid }) => {
     </div>
   );
 };
-const MTButton = ({ date, info, icon_type }) => {
+const MTButton = ({ info, icon_type }) => {
   return (
     <>
-      <div className="wov-button-wrapper">
+      <div className="mt-button-wrapper">
         {/* <div id="punch-item-button" fontSize="14px">
             [Icon]
           </div> */}
         {/* <Icon as={TbCircleCheck} w="17px" h="17px" /> */}
-        <CustomIcon type={icon_type} />
-        <Text className="mt-button-date">{date}</Text>
+        <CustomIcon type={icon_type} className="mt-button-icon" />
+        <Text className="mt-button-type">{icon_type}</Text>
         <Text className="mt-button-info">{info}</Text>
-        <></>
+        <AccordionIcon className="mt-button-dropdown" />
       </div>
-      <AccordionIcon />
     </>
   );
 };
@@ -274,11 +281,10 @@ const CustomMTAccordionPanel = ({
 }) => {
   return (
     <AccordionPanel
-      bg="#F2F0ED"
       css={{
         margin: 0,
         padding: "5px 20px",
-        borderTop: "1px solid #DBDDE1",
+        // borderTop: "1px solid #DBDDE1",
       }}
     >
       <MTPanel
@@ -376,11 +382,16 @@ const DemoAccordion = ({ isPaid = false, wv_arr = [0, 1, 0, 1] }) => {
     </Accordion>
   );
 };
-const StartLetter = ({ loc, date, href }) => {
+const StartLetter = ({ loc, date, href, plan, elevation }) => {
   return (
     <div className="start-letter-wrapper">
-      <Text id="start-letter-loc">{loc}</Text>
-      <Text id="start-letter-date">Last Updated: {date}</Text>
+      <div className="start-letter-text">
+        <Text className="start-letter-loc">{loc}</Text>
+        <Text className="start-letter-plan-elevation">
+          Plan: {plan} | Elevation: {elevation}
+        </Text>
+        <Text className="start-letter-date">Last Updated: {date}</Text>
+      </div>
       <LinkBox className="start-letter-link">
         <LinkOverlay href={href} />
         <Icon as={FiExternalLink} w="17px" h="17px" />
@@ -398,17 +409,20 @@ const TimelineNode = ({ isRed = false, text }) => {
 };
 const TimelineItem = ({ name, loc, dates }) => {
   return (
-    <Box
-      className="timeline-item-box"
-      boxShadow={"md"}
-      css={{ padding: "10px 20px", margin: "10px" }}
-    >
-      <p className="timeline-item-name">{name}</p>
-      <div className="timeline-item-details">
-        <p className="timeline-item-loc">{loc}</p>
-        <p>{dates}</p>
-      </div>
-    </Box>
+    <>
+      {/* <Subdivider /> */}
+      <div className="timeline-divider" />
+      <Box
+        className="timeline-item-box"
+        css={{ padding: "0px 15px", margin: "10px" }}
+      >
+        <p className="timeline-item-name">{name}</p>
+        <div className="timeline-item-details">
+          <p className="timeline-item-loc">{loc}</p>
+          <p>{dates}</p>
+        </div>
+      </Box>
+    </>
   );
 };
 export function App() {
@@ -427,6 +441,8 @@ export function App() {
       }
     });
   }, []);
+  const [activities, setActivities] = useState([]);
+  const [lots, setLots] = useState([]);
   useEffect(() => {
     const fetchSchedules = async () => {
       const auth = getAuth();
@@ -437,8 +453,6 @@ export function App() {
 
     fetchSchedules();
   }, []);
-  const [activities, setActivities] = useState([]);
-
   return (
     <ChakraProvider>
       <p id="real-data">Real Data</p>
@@ -480,7 +494,9 @@ export function App() {
             <WorkOrderUpdates />
             <DocData />
           </div> */}
-        <Notifs />
+        <div className="overflow-wrapper">
+          <Notifs />
+        </div>
         {/* </Box> */}
         <ReportHeader text="Pay Period" />
         <div className="upp-wrapper">
@@ -587,14 +603,13 @@ export function App() {
             />
           </AccordionItem>
         </Accordion> */}
-        <Text id="schedule-title">Upcoming Schedule Items:</Text>
-        <Subdivider />
+        <ReportHeader text="Two Weeks Schedule" />
         <div id="schedule-wrapper">
           <div id="schedule-divider">
             <div id="timeline-line" />
           </div>
           <div className="timeline-wrapper">
-            <TimelineNode isRed={true} text="Aug 1, 2022" />
+            <TimelineNode isRed={true} text="This Week: July 18 - July 24" />
             {/* <TimelineItem
               loc="Jasper 1C | Lot 5"
               dates="Mon - Wed"
@@ -607,12 +622,17 @@ export function App() {
             /> */}
             {/* <Schedule date_start="2022-06-06" date_end="2022-06-12" /> */}
             <GetWeekActivities
+              lots={lots}
+              setLots={setLots}
               activities={activities}
               start_date={new Date(2022, 7, 1)}
               end_date={new Date(2022, 7, 8)}
+              isFirst={true}
             />
-            <TimelineNode text="Aug 8, 2022" />
+            <TimelineNode text="Next Week: July 25 - July 31" />
             <GetWeekActivities
+              lots={lots}
+              setLots={setLots}
               activities={activities}
               start_date={new Date(2022, 7, 8)}
               end_date={new Date(2022, 7, 15)}
@@ -628,10 +648,118 @@ export function App() {
               dates="Thu - Fri"
               name="Framing Crane"
             /> */}
-            <TimelineNode text="Aug 15, 2022" />
+            <TimelineNode text="Following Week: August 1 - August 7" />
           </div>
         </div>
-        <ReportHeader text="Scope of Work" />
+        <ReportHeader text="Start Letters for This Week's Lots" />
+        <div className="overflow-wrapper">
+          <StartLetterData lots={lots} />
+        </div>
+        <ReportHeader text="Material Tracking" />
+        <div className="material-wrapper">
+          <Tabs variant="unstyled">
+            <TabList
+              css={{
+                background: "#DBDDE1",
+                borderRadius: "25px",
+                height: "40px",
+                outline: "4px solid #DBDDE1",
+                alignItems: "center",
+                justifyContent: "space-evenly",
+              }}
+            >
+              <CustomTab text="Delivered Items" />
+              <CustomTab text="Pending Items" />
+            </TabList>
+            <TabPanels paddingTop="20px">
+              <TabPanel css={{ margin: 0, padding: 0 }}>
+                <Accordion allowMultiple>
+                  <AccordionItem borderBottom="none">
+                    <CustomMTAccordionButton
+                      date="Jul 10, 2022"
+                      info="16d framing nails"
+                      icon_type="Delivered"
+                    />
+                    <CustomMTAccordionPanel
+                      code="FM4505"
+                      quantity="2500"
+                      id="524917889015W4"
+                      lots="319, 331"
+                      isDelivered={true}
+                      date="07/07/2022"
+                    />
+                  </AccordionItem>
+                  <AccordionItem borderBottom="none">
+                    <CustomMTAccordionButton
+                      date="Jul 10, 2022"
+                      info="8d framing nails"
+                      icon_type="Delivered"
+                    />
+                    <CustomMTAccordionPanel
+                      code="FM4505"
+                      quantity="2500"
+                      id="524917889015W4"
+                      lots="319, 331"
+                      isDelivered={true}
+                      date="07/10/2022"
+                    />
+                  </AccordionItem>
+                </Accordion>
+              </TabPanel>
+              <TabPanel css={{ margin: 0, padding: 0 }}>
+                <Accordion allowMultiple>
+                  <AccordionItem borderBottom="none">
+                    <CustomMTAccordionButton
+                      date="Jul 19, 2022"
+                      info="1/2-in Plywood for headers"
+                      icon_type="On The Way"
+                    />
+                    <CustomMTAccordionPanel
+                      code="FM4505"
+                      quantity="2500"
+                      id="524917889015W4"
+                      lots="338, 312"
+                      isDelivered={false}
+                      date="07/23/2022"
+                    />
+                  </AccordionItem>
+                  <AccordionItem borderBottom="none">
+                    <CustomMTAccordionButton
+                      date="Jul 19, 2022"
+                      info="2 x 6 studs"
+                      icon_type="Order Placed"
+                    />
+                    <CustomMTAccordionPanel
+                      code="FM4505"
+                      quantity="2500"
+                      id="524917889015W4"
+                      lots="338, 312"
+                      isDelivered={false}
+                      date="08/02/2022"
+                    />
+                  </AccordionItem>
+                  <AccordionItem borderBottom="none">
+                    <CustomMTAccordionButton
+                      date="Jul 19, 2022"
+                      info="20d framing nails"
+                      icon_type="Delayed"
+                    />
+                    <CustomMTAccordionPanel
+                      code="FM4505"
+                      quantity="2500"
+                      id="524917889015W4"
+                      lots="338, 312"
+                      isDelivered={false}
+                      date="07/31/2022"
+                    />
+                  </AccordionItem>
+                </Accordion>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </div>
+
+        {/* <ReportHeader text="Scope of Work" />
         <Tabs className="work-tabs" variant="line">
           <TabList css={{}}>
             <CustomTab text="Start Letter" />
@@ -648,11 +776,11 @@ export function App() {
                 overflow: "scroll",
               }}
             >
-              {/* <StartLetter loc="Jasper 1C | Lot 5" date="07/07/2022" href="#" />
+              <StartLetter loc="Jasper 1C | Lot 5" date="07/07/2022" href="#" />
               <StartLetter loc="Jasper 1C | Lot 6" date="07/07/2022" href="#" />
               <StartLetter loc="Jasper 1C | Lot 7" date="07/07/2022" href="#" />
               <StartLetter loc="Jasper 1C | Lot 8" date="07/07/2022" href="#" />
-              <StartLetter loc="Jasper 1C | Lot 9" date="07/07/2022" href="#" /> */}
+              <StartLetter loc="Jasper 1C | Lot 9" date="07/07/2022" href="#" />
               <StartLetterData />
             </TabPanel>
             <TabPanel
@@ -663,7 +791,7 @@ export function App() {
                 overflow: "scroll",
               }}
             >
-              {/* <DemoAccordion isWO={true} wv_arr={[1, 1, 1, 1]} /> */}
+              <DemoAccordion isWO={true} wv_arr={[1, 1, 1, 1]} />
               <Accordion allowMultiple>
                 <WorkOrderData />
               </Accordion>
@@ -672,7 +800,7 @@ export function App() {
               <DemoAccordion isWO={false} wv_arr={[0, 0, 0, 0]} />
             </TabPanel>
             <TabPanel css={{ margin: 0, padding: 0 }}>
-              {/* <DemoAccordion isPaid={true} wv_arr={[1, 0, 1, 0]} /> */}
+              <DemoAccordion isPaid={true} wv_arr={[1, 0, 1, 0]} />
 
               <Accordion allowMultiple>
                 <SOWWOApprovals />
@@ -829,7 +957,7 @@ export function App() {
         <RewardItem isClaimed={true} num="5" name="Gift Card #1" />
         <CustomDivider />
         <RewardItem isClaimed={false} num="10" name="Gift Card #2" />
-        <CustomDivider />
+        <CustomDivider /> */}
       </div>
     </ChakraProvider>
   );

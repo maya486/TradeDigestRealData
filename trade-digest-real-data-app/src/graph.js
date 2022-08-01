@@ -130,7 +130,9 @@ const GET_DOC_UPDATES = gql`
 `;
 
 const vendor_id = 12417;
-export const StartLetterData = () => {
+export const StartLetterData = ({ lots }) => {
+  console.log("lots");
+  console.log(lots);
   const {
     loading: dev_loading,
     error: dev_error,
@@ -141,7 +143,7 @@ export const StartLetterData = () => {
   if (dev_loading) return <p>Loading...</p>;
   if (dev_error) return <p>Error 0</p>;
   return dev_data.kernel_development_vendor_selection.map((dev_info) => (
-    <StartLetterDev key={dev_info.id} dev_info={dev_info} />
+    <StartLetterDev key={dev_info.id} dev_info={dev_info} lots={lots} />
   ));
 };
 export const DocData = () => {
@@ -154,8 +156,6 @@ export const DocData = () => {
   });
   if (dev_loading) return <p>Loading...</p>;
   if (dev_error) return <p>{dev_error.message}</p>;
-  // console.log("docData");
-  // console.log(dev_data.kernel_development_vendor_selection.length);
   return dev_data.kernel_development_vendor_selection.map((dev_info) => (
     <DocDev key={dev_info.id} dev_info={dev_info} />
   ));
@@ -166,13 +166,10 @@ const DocDev = ({ dev_info }) => {
     error: doc_error,
     data: doc_data,
   } = useQuery(GET_DOC_UPDATES, {
-    variables: { date: "2022-07-27", devlopmentId: dev_info.development_id },
+    variables: { date: "2022-07-27", developmentId: dev_info.development_id },
   });
   if (doc_loading) return <p>Loading...</p>;
   if (doc_error) return <p>{doc_error.message}</p>;
-  console.log("docDev");
-  console.log(doc_data);
-  console.log(dev_info.development_id);
   return doc_data.kernel_delivery_document.map((doc_info) => {
     if (
       doc_info.lot === null ||
@@ -202,7 +199,7 @@ const DocDev = ({ dev_info }) => {
     );
   });
 };
-const StartLetterDev = ({ dev_info }) => {
+const StartLetterDev = ({ dev_info, lots }) => {
   const {
     loading: sl_loading,
     error: sl_error,
@@ -218,10 +215,11 @@ const StartLetterDev = ({ dev_info }) => {
       lot_code={sl_info?.lot?._code}
       updated_at={sl_info.updated_at}
       dev_name={dev_info.development.name}
+      lots={lots}
     />
   ));
 };
-const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name }) => {
+const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
   const {
     loading: url_loading,
     error: url_error,
@@ -236,17 +234,41 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name }) => {
     toDate(parseISO(updated_at)),
     "MM/dd/yyyy"
   );
-  // console.log(converted_updated_at);
+  var is_valid_loc = false;
+  for (var i = 0; i < lots.length; i++) {
+    if (lots.lot === lot_code && lots.dev === dev_name) {
+      is_valid_loc = true;
+    }
+  }
+  if (!is_valid_loc) {
+    return <></>;
+  }
   return (
     <div className="start-letter-wrapper">
-      <Text id="start-letter-loc">
+      <div className="start-letter-text">
+        <Text className="start-letter-loc">
+          {dev_name} | Lot {lot_code}
+        </Text>
+        <Text className="start-letter-plan-elevation">
+          Plan: - | Elevation: -
+        </Text>
+        <Text className="start-letter-date">
+          Last Updated: {converted_updated_at}
+        </Text>
+      </div>
+      <LinkBox className="start-letter-link">
+        <LinkOverlay href={url_data.s3_document_download_url.download_url} />
+        <Icon as={FiExternalLink} w="17px" h="17px" />
+      </LinkBox>
+
+      {/* <Text id="start-letter-loc">
         {dev_name} | Lot {lot_code}
       </Text>
       <Text id="start-letter-date">Last Updated: {converted_updated_at}</Text>
       <LinkBox className="start-letter-link">
         <LinkOverlay href={url_data.s3_document_download_url.download_url} />
         <Icon as={FiExternalLink} w="17px" h="17px" />
-      </LinkBox>
+      </LinkBox> */}
     </div>
   );
 };
@@ -509,7 +531,6 @@ export const WorkOrderData = () => {
   });
 };
 const WorkOrderHO = ({ wo_info }) => {
-  // console.log(wo_info.activity.fs.ho.id);
   const {
     loading: ho_loading,
     error: ho_error,
@@ -664,24 +685,26 @@ export const Schedule = ({ date_start, date_end }) => {
         // return <></>;
 
         return (
-          <Box
-            className="timeline-item-box"
-            boxShadow={"md"}
-            css={{ padding: "10px 20px", margin: "10px" }}
-          >
-            <p className="timeline-item-name">
-              {s_info.work_order_items[0].cost_type.cost_category.name}
-            </p>
-            <div className="timeline-item-details">
-              <p className="timeline-item-loc">
-                {s_info.activity.fs.ho.lot.development.name} |{" "}
-                {s_info.activity.fs.ho.lot.code}
+          <>
+            <div className="timeline-divider" />
+            <Box
+              className="timeline-item-box"
+              css={{ padding: "0px 15px", margin: "10px" }}
+            >
+              <p className="timeline-item-name">
+                {s_info.work_order_items[0].cost_type.cost_category.name}
               </p>
-              <p>
-                {start} - {end}
-              </p>
-            </div>
-          </Box>
+              <div className="timeline-item-details">
+                <p className="timeline-item-loc">
+                  {s_info.activity.fs.ho.lot.development.name} |{" "}
+                  {s_info.activity.fs.ho.lot.code}
+                </p>
+                <p>
+                  {start} - {end}
+                </p>
+              </div>
+            </Box>
+          </>
         );
       })}
     </>
@@ -780,8 +803,6 @@ export const SOWWOId = ({ id }) => {
   });
 };
 const SOWWOPlanElevation = ({ info }) => {
-  // console.log(wo_info.activity.fs.ho.id);
-
   const { loading, error, data } = useQuery(GET_PLAN_ELEVATION, {
     variables: { hoId: info.activity.fs.ho.id },
   });

@@ -36,6 +36,7 @@ import {
 } from "firebase/firestore";
 import { TbChevronsDownLeft } from "react-icons/tb";
 import { toDate, parseISO, format, parse } from "date-fns";
+import { useEffect } from "react";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_apiKey,
@@ -63,15 +64,16 @@ const activityNames = [
   "2nd Floor Frame",
   "Framing Snap lines",
 ];
+const vendor_names = ["STAPLE 3 LAND & CATTLE, LLC", "Staple 3 Land & Cattle"];
 const getActivities = async ({ id, development, lot }) => {
   try {
     const activitiesRef = collection(db, `schedule/${id}/activities`);
     const activitiesQuery = await query(
       activitiesRef,
-      where("title", "in", activityNames)
+      where("vendor", "in", vendor_names)
+      // where("title", "in", activityNames)
     );
     const activities = await getDocs(activitiesQuery);
-
     const activitiesData = activities.docs.map(async (activity) => {
       return {
         id: activity.id,
@@ -88,22 +90,12 @@ const getActivities = async ({ id, development, lot }) => {
   }
 };
 
-const filterActivitiesByDate = ({ activities, start_date, end_date }) => {
-  const filtered = [];
-  activities.forEach((activity) => {
-    if (activity.start >= start_date && activity.start < end_date) {
-      filtered.push(activity);
-    }
-  });
-  return filtered;
-};
-
 export const getSchedules = async () => {
   try {
     const scheduleRef = collection(db, "schedule");
     const scheduleQuery = await query(
-      scheduleRef,
-      where("developmentId", "in", [251])
+      scheduleRef
+      // where("developmentId", "in", [35])
     );
     const scheduleIds = [];
 
@@ -124,11 +116,14 @@ export const getSchedules = async () => {
     const activities_list = [];
     activities.forEach((schedule) => {
       schedule.forEach((activity) => {
-        let dates = "";
-        activity.dates.forEach(({ date }) => {
-          dates += date;
-          dates += " ";
-        });
+        // let dates = "";
+        // activity.dates.forEach(({ date }) => {
+        //   dates += date;
+        //   dates += " ";
+        // });
+        // if (typeof activity.dates === "string") {
+
+        // }
         activities_list.push({
           dev: activity.development,
           lot: activity.lot,
@@ -149,35 +144,81 @@ export const getSchedules = async () => {
     console.log(err);
   }
 };
+
+const filterActivitiesByDate = ({ activities, start_date, end_date }) => {
+  const filtered = [];
+  const lots = [];
+  activities.forEach((activity) => {
+    if (activity.start >= start_date && activity.start < end_date) {
+      filtered.push(activity);
+      lots.push({ dev: activity.dev, lot: activity.lot });
+    }
+  });
+  return { lots, filtered };
+};
+
 // new Date(2022, 7, 1)
-export const GetWeekActivities = ({ activities, start_date, end_date }) => {
-  const filtered = filterActivitiesByDate({
+export const GetWeekActivities = ({
+  lots,
+  setLots,
+  activities,
+  start_date,
+  end_date,
+  isFirst = false,
+}) => {
+  const res = filterActivitiesByDate({
     activities: activities,
     start_date: start_date,
     end_date: end_date,
   });
+  console.log("activities");
+  console.log(activities);
+  const filtered = res.filtered;
+  // console.log(lots);
+  useEffect(() => {
+    if (isFirst) {
+      setLots(res.lots);
+    }
+  }, [isFirst, res.lots, setLots]);
+  // console.log("activities");
+  // console.log(activities);
+  // console.log("filtered");
+  // console.log(start_date, end_date);
+  // console.log(filtered);
+  // const filtered = activities;
   return (
     <>
       {filtered.map((activity) => {
-        const start = format(activity.start, "ccc");
-        const end = format(activity.end, "ccc");
-        return (
-          <Box
-            className="timeline-item-box"
-            boxShadow={"md"}
-            css={{ padding: "10px 20px", margin: "10px" }}
-          >
-            <p className="timeline-item-name">{activity.title}</p>
-            <div className="timeline-item-details">
-              <p className="timeline-item-loc">
-                {activity.dev} | {activity.lot}
-              </p>
-              <p>
-                {start} - {end}
-              </p>
-            </div>
-          </Box>
-        );
+        try {
+          const start = format(activity.start, "ccc");
+          const end = format(activity.end, "ccc");
+
+          return (
+            <Box
+              className="timeline-item-box"
+              boxShadow={"md"}
+              css={{ padding: "10px 20px", margin: "10px" }}
+            >
+              <p className="timeline-item-name">{activity.title}</p>
+              <div className="timeline-item-details">
+                <p className="timeline-item-loc">
+                  {activity.dev} | {activity.lot}
+                </p>
+                <p>
+                  {start} - {end}
+                </p>
+              </div>
+            </Box>
+          );
+        } catch (err) {
+          console.log("err");
+          console.log(err);
+          console.log(activity.start);
+          console.log(activity.end);
+          console.log(activity.title);
+          console.log(activity.dev);
+          console.log(activity.lot);
+        }
       })}
     </>
   );
