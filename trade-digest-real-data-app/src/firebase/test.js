@@ -36,7 +36,7 @@ import {
 } from "firebase/firestore";
 import { TbChevronsDownLeft } from "react-icons/tb";
 import { toDate, parseISO, format, parse } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_apiKey,
@@ -145,7 +145,7 @@ export const getSchedules = async () => {
   }
 };
 
-const filterActivitiesByDate = ({ activities, start_date, end_date }) => {
+export const filterActivitiesByDate = ({ activities, start_date, end_date }) => {
   const filtered = [];
   const lots = [];
   activities.forEach((activity) => {
@@ -159,33 +159,8 @@ const filterActivitiesByDate = ({ activities, start_date, end_date }) => {
 
 // new Date(2022, 7, 1)
 export const GetWeekActivities = ({
-  lots,
-  setLots,
-  activities,
-  start_date,
-  end_date,
-  isFirst = false,
+  filtered
 }) => {
-  const res = filterActivitiesByDate({
-    activities: activities,
-    start_date: start_date,
-    end_date: end_date,
-  });
-  console.log("activities");
-  console.log(activities);
-  const filtered = res.filtered;
-  // console.log(lots);
-  useEffect(() => {
-    if (isFirst) {
-      setLots(res.lots);
-    }
-  }, [isFirst, res.lots, setLots]);
-  // console.log("activities");
-  // console.log(activities);
-  // console.log("filtered");
-  // console.log(start_date, end_date);
-  // console.log(filtered);
-  // const filtered = activities;
   return (
     <>
       {filtered.map((activity) => {
@@ -218,6 +193,7 @@ export const GetWeekActivities = ({
           console.log(activity.title);
           console.log(activity.dev);
           console.log(activity.lot);
+          return null;
         }
       })}
     </>

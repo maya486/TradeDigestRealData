@@ -47,6 +47,7 @@ import {
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { getAuth, signInAnonymously } from "firebase/auth";
+import { WeekActivities } from "./WeekActivities";
 
 const date = "Fri Jun 10, 2022";
 const name = "Staple 3";
@@ -399,14 +400,7 @@ const StartLetter = ({ loc, date, href, plan, elevation }) => {
     </div>
   );
 };
-const TimelineNode = ({ isRed = false, text }) => {
-  return (
-    <div className="timeline-node">
-      <div className="timeline-bullet" />
-      <div className="timeline-node-text">{text}</div>
-    </div>
-  );
-};
+
 const TimelineItem = ({ name, loc, dates }) => {
   return (
     <>
@@ -452,7 +446,7 @@ export function App() {
     };
 
     fetchSchedules();
-  }, []);
+  }, [setActivities]);
   return (
     <ChakraProvider>
       <p id="real-data">Real Data</p>
@@ -609,7 +603,6 @@ export function App() {
             <div id="timeline-line" />
           </div>
           <div className="timeline-wrapper">
-            <TimelineNode isRed={true} text="This Week: July 18 - July 24" />
             {/* <TimelineItem
               loc="Jasper 1C | Lot 5"
               dates="Mon - Wed"
@@ -621,22 +614,7 @@ export function App() {
               name="Framing Siding"
             /> */}
             {/* <Schedule date_start="2022-06-06" date_end="2022-06-12" /> */}
-            <GetWeekActivities
-              lots={lots}
-              setLots={setLots}
-              activities={activities}
-              start_date={new Date(2022, 7, 1)}
-              end_date={new Date(2022, 7, 8)}
-              isFirst={true}
-            />
-            <TimelineNode text="Next Week: July 25 - July 31" />
-            <GetWeekActivities
-              lots={lots}
-              setLots={setLots}
-              activities={activities}
-              start_date={new Date(2022, 7, 8)}
-              end_date={new Date(2022, 7, 15)}
-            />
+            <WeekActivities activities={activities} setLots={setLots} />
             {/* <Schedule date_start="2022-06-13" date_end="2022-06-19" /> */}
             {/* <TimelineItem
               loc="Jasper 1C | Lot 6"
@@ -648,7 +626,6 @@ export function App() {
               dates="Thu - Fri"
               name="Framing Crane"
             /> */}
-            <TimelineNode text="Following Week: August 1 - August 7" />
           </div>
         </div>
         <ReportHeader text="Start Letters for This Week's Lots" />
