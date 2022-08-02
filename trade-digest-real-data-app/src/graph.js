@@ -5,7 +5,7 @@ import { BiGift } from "react-icons/bi";
 import { FiExternalLink } from "react-icons/fi";
 import { TbCircleCheck } from "react-icons/tb";
 import { toDate, parseISO, format } from "date-fns";
-import { CustomIcon, CustomDivider } from "./App.js";
+import { CustomIcon, CustomDivider, Subdivider } from "./App.js";
 
 import {
   Text,
@@ -131,8 +131,6 @@ const GET_DOC_UPDATES = gql`
 
 const vendor_id = 12417;
 export const StartLetterData = ({ lots }) => {
-  console.log("lots");
-  console.log(lots);
   const {
     loading: dev_loading,
     error: dev_error,
@@ -236,7 +234,7 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
   );
   var is_valid_loc = false;
   for (var i = 0; i < lots.length; i++) {
-    if (lots.lot === lot_code && lots.dev === dev_name) {
+    if (lots[i].lot === lot_code && lots[i].dev === dev_name) {
       is_valid_loc = true;
     }
   }
@@ -257,7 +255,10 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
         </Text>
       </div>
       <LinkBox className="start-letter-link">
-        <LinkOverlay href={url_data.s3_document_download_url.download_url} />
+        <LinkOverlay
+          href={url_data.s3_document_download_url.download_url}
+          target="_blank"
+        />
         <Icon as={FiExternalLink} w="17px" h="17px" />
       </LinkBox>
 
@@ -864,6 +865,85 @@ const SOWWOPlanElevation = ({ info }) => {
       </AccordionPanel>
     </AccordionItem>
   );
+};
+
+const GET_RECORDABLES = gql`
+  query GetRecordables($vendorId: Int) {
+    kernel_task_recordable(
+      where: { task: { vendor_id: { _eq: $vendorId } }, status: { _eq: todo } }
+    ) {
+      task {
+        title
+        lot {
+          _code
+          development {
+            name
+            name_slug
+          }
+        }
+      }
+      status
+      transcript
+      s3_document {
+        object_url
+        id
+      }
+      id
+      original_transcript
+    }
+  }
+`;
+export const Recordables = () => {
+  const { loading, error, data } = useQuery(GET_RECORDABLES, {
+    variables: {
+      vendor_id,
+    },
+  });
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error 0 {error.message}</p>;
+  // return <></>;
+  return data.kernel_task_recordable.map((info) => {
+    // if (
+    //   info.activity === null ||
+    //   info.activity.fs === null ||
+    //   info.activity.fs.ho === null ||
+    //   info.activity.fs.ho.lot === null ||
+    //   info.work_order_items.length === 0
+    // ) {
+    //   return <></>;
+    // }
+    const link = `https://mosaic.build/${info.task.lot.development.name_slug}/${info.task.lot._code}/${info.id}`;
+    return (
+      <>
+        <Subdivider />
+        <Box className="punch-item-box">
+          <div className="notif-item">
+            <div className="bullet"></div>
+            <div className="notif-item-text">
+              <p className="notif-name">
+                {/* {info.transcript.length > 35
+                  ? `${info.transcript.substring(0, 35)}...`
+                  : info.transcript.length === 0
+                  ? `Name Not Available`
+                  : info.transcript} */}
+                {info.transcript.length > 0
+                  ? info.transcript
+                  : `No Name Available`}
+              </p>
+              <p className="notif-details">
+                {info.task.lot.development.name} | Lot {info.task.lot._code}
+              </p>
+            </div>
+            <LinkBox className="punch-item-link">
+              <LinkOverlay href={link} target="_blank" />
+              {/* <div id="punch-item-button">[Icon]</div> */}
+              <Icon as={FiExternalLink} w="23px" h="23px" />
+            </LinkBox>
+          </div>
+        </Box>
+      </>
+    );
+  });
 };
 // function DisplayLocations({ vid }) {
 //   const {

@@ -4,6 +4,7 @@ import {
   WorkOrderData,
   Notifs,
   SOWWOApprovals,
+  Recordables,
 } from "./graph";
 import { BiGift } from "react-icons/bi";
 import { FiExternalLink } from "react-icons/fi";
@@ -54,7 +55,7 @@ const name = "Staple 3";
 export const CustomDivider = () => {
   return <div className="divider" />;
 };
-const Subdivider = () => {
+export const Subdivider = () => {
   return <div className="subdivider" />;
 };
 const BigDivider = () => {
@@ -493,6 +494,8 @@ export function App() {
         </div>
         {/* </Box> */}
         <ReportHeader text="Pay Period" />
+        <Text className="subsection">Remaining Punch Items </Text>
+        <Subdivider />
         <div className="upp-wrapper">
           <div className="circlegraph">
             {[...Array(14)].map((x, i) => (
@@ -507,10 +510,8 @@ export function App() {
             <Text id="countdown-helper">Until Next Pay Run</Text>
           </div>
         </div>
-        <Text className="subsection">Remaining Punch Items </Text>
-        <Subdivider />
-        <div className="punch-items-wrapper">
-          <Box className="punch-item-box">
+        <div className="punch-items-wrapper overflow-wrapper">
+          {/* <Box className="punch-item-box">
             <PunchItem
               name="Inspect footing for cracks"
               details="Jasper 1C | Lot 5"
@@ -524,7 +525,8 @@ export function App() {
               details="Jasper 1C | Lot 5"
               href="#"
             />
-          </Box>
+          </Box> */}
+          <Recordables />
         </div>
         <Text className="subsection">This Pay Period Work Orders</Text>
         <Accordion allowMultiple className="wo-accordion">

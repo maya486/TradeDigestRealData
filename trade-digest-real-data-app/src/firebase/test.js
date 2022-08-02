@@ -145,11 +145,19 @@ export const getSchedules = async () => {
   }
 };
 
-export const filterActivitiesByDate = ({ activities, start_date, end_date }) => {
+export const filterActivitiesByDate = ({
+  activities,
+  start_date,
+  end_date,
+}) => {
   const filtered = [];
   const lots = [];
   activities.forEach((activity) => {
-    if (activity.start >= start_date && activity.start < end_date) {
+    if (
+      activity.start >= start_date &&
+      activity.start < end_date &&
+      activity.dev !== "Template"
+    ) {
       filtered.push(activity);
       lots.push({ dev: activity.dev, lot: activity.lot });
     }
@@ -158,9 +166,7 @@ export const filterActivitiesByDate = ({ activities, start_date, end_date }) => 
 };
 
 // new Date(2022, 7, 1)
-export const GetWeekActivities = ({
-  filtered
-}) => {
+export const GetWeekActivities = ({ filtered }) => {
   return (
     <>
       {filtered.map((activity) => {
@@ -169,30 +175,43 @@ export const GetWeekActivities = ({
           const end = format(activity.end, "ccc");
 
           return (
-            <Box
-              className="timeline-item-box"
-              boxShadow={"md"}
-              css={{ padding: "10px 20px", margin: "10px" }}
-            >
-              <p className="timeline-item-name">{activity.title}</p>
-              <div className="timeline-item-details">
-                <p className="timeline-item-loc">
-                  {activity.dev} | {activity.lot}
-                </p>
-                <p>
-                  {start} - {end}
-                </p>
-              </div>
-            </Box>
+            <>
+              {/* <Subdivider /> */}
+              <div className="timeline-divider" />
+              <Box
+                className="timeline-item-box"
+                css={{ padding: "0px 15px", margin: "10px" }}
+              >
+                <p className="timeline-item-name">{activity.title}</p>
+                <div className="timeline-item-details">
+                  <p className="timeline-item-loc">
+                    {activity.dev} | {activity.lot}
+                  </p>
+                  <p>
+                    {start} - {end}
+                  </p>
+                </div>
+              </Box>
+            </>
+            // <Box
+            //   className="timeline-item-box"
+            //   boxShadow={"md"}
+            //   css={{ padding: "10px 20px", margin: "10px" }}
+            // >
+            //   <p className="timeline-item-name">{activity.title}</p>
+            //   <div className="timeline-item-details">
+            //     <p className="timeline-item-loc">
+            //       {activity.dev} | {activity.lot}
+            //     </p>
+            //     <p>
+            //       {start} - {end}
+            //     </p>
+            //   </div>
+            // </Box>
           );
         } catch (err) {
           console.log("err");
           console.log(err);
-          console.log(activity.start);
-          console.log(activity.end);
-          console.log(activity.title);
-          console.log(activity.dev);
-          console.log(activity.lot);
           return null;
         }
       })}
