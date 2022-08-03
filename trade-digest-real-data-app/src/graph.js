@@ -129,7 +129,7 @@ const GET_DOC_UPDATES = gql`
   }
 `;
 
-const vendor_id = 12417;
+const vendor_id = 12480;
 export const StartLetterData = ({ lots }) => {
   const {
     loading: dev_loading,
@@ -187,7 +187,7 @@ const DocDev = ({ dev_info }) => {
             <p className="notif-name">Document has been updated</p>
             <p className="notif-id">ID:{doc_info.id}</p>
             <p className="notif-loc">
-              {doc_info.lot.development.name} | {doc_info.lot.code}
+              {doc_info.lot.development.name} | Lot {doc_info.lot.code}
             </p>
             <p className="notif-details">{doc_info.filename}</p>
           </div>
@@ -340,8 +340,8 @@ export const WorkOrderApprovals = () => {
                 <p className="notif-name">Work order has been approved</p>
                 <p className="notif-id">KER:{woa_info.work_order.id}</p>
                 <p className="notif-loc">
-                  {woa_info.work_order.activity.fs.ho.lot.development.name} |{" "}
-                  {woa_info.work_order.activity.fs.ho.lot.code}
+                  {woa_info.work_order.activity.fs.ho.lot.development.name} |
+                  Lot {woa_info.work_order.activity.fs.ho.lot.code}
                 </p>
                 {woa_data.approved_by_user != null && (
                   <p className="notif-details">
@@ -414,7 +414,7 @@ export const WorkOrderUpdates = () => {
                 <p className="notif-name">Work order has been updated</p>
                 <p className="notif-id">KER:{wou_info.id}</p>
                 <p className="notif-loc">
-                  {wou_info.activity.fs.ho.lot.development.name} |{" "}
+                  {wou_info.activity.fs.ho.lot.development.name} | Lot{" "}
                   {wou_info.activity.fs.ho.lot.code}
                 </p>
                 <p className="notif-details">{wou_info.notes}</p>
@@ -439,51 +439,24 @@ export const Notifs = () => {
 
 const GET_WO = gql`
   query GetWO($vendorId: Int) {
-    kernel_work_order(
-      where: {
-        _or: [
-          {
-            activity: {
-              status: { _eq: Scheduled }
-              _and: { planned_start: { _lte: "2022-08-3", _gte: "2022-07-27" } }
-            }
-          }
-          { activity: { status: { _eq: Started } } }
-        ]
-        vendor_id: { _eq: $vendorId }
-      }
-    ) {
+    kernel_work_order(where: { vendor_id: { _eq: $vendorId } }) {
       id
       vendor_id
-      activity {
-        fs: field_schedule {
-          ho: house_order {
-            lot {
-              code: _code
-              development {
-                name
-              }
-            }
-            model_configuration_id
-            model_configuration {
-              model {
-                name
-              }
-            }
-            id
-          }
-        }
-        planned_duration
-        planned_end
-        planned_start
-        status
-      }
       work_order_items(where: { amount: { _gt: "0" } }) {
         amount
         cost_type {
           name
           cost_category {
             name
+          }
+        }
+        development {
+          name
+        }
+        house_order {
+          id
+          lot {
+            _code
           }
         }
       }
@@ -508,7 +481,7 @@ const GET_PLAN_ELEVATION = gql`
     }
   }
 `;
-export const WorkOrderData = () => {
+export const WorkOrderData = ({ lots }) => {
   const {
     loading: wo_loading,
     error: wo_error,
@@ -520,12 +493,27 @@ export const WorkOrderData = () => {
   if (wo_error) return <p>{wo_error.message}</p>;
   return wo_data.kernel_work_order.map((wo_info) => {
     if (
-      wo_info.activity === null ||
-      wo_info.activity.fs === null ||
-      wo_info.activity.fs.ho === null ||
-      wo_info.activity.fs.ho.lot === null ||
-      wo_info.work_order_items.length === 0
+      // wo_info.activity === null ||
+      // wo_info.activity.fs === null ||
+      // wo_info.activity.fs.ho === null ||
+      // wo_info.activity.fs.ho.lot === null ||
+      wo_info.work_order_items.length === 0 ||
+      wo_info.work_order_items[0].development === null ||
+      wo_info.work_order_items[0].development.name === null ||
+      wo_info.work_order_items[0].house_order === null
     ) {
+      return <></>;
+    }
+    var is_valid_loc = false;
+    for (var i = 0; i < lots.length; i++) {
+      if (
+        lots[i].lot === wo_info.work_order_items[0].house_order.lot._code &&
+        lots[i].dev === wo_info.work_order_items[0].development.name
+      ) {
+        is_valid_loc = true;
+      }
+    }
+    if (!is_valid_loc) {
       return <></>;
     }
     return <WorkOrderHO wo_info={wo_info} />;
@@ -537,7 +525,7 @@ const WorkOrderHO = ({ wo_info }) => {
     error: ho_error,
     data: ho_data,
   } = useQuery(GET_PLAN_ELEVATION, {
-    variables: { hoId: wo_info.activity.fs.ho.id },
+    variables: { hoId: wo_info.work_order_items[0].house_order.id },
   });
   if (ho_loading) return <p>Loading...</p>;
   if (ho_error) return <p>{ho_error.message}</p>;
@@ -557,8 +545,8 @@ const WorkOrderHO = ({ wo_info }) => {
             <div className="wov-button-text-wrapper">
               <Text className="wov-button-id">KER:WO:{wo_info.id}</Text>
               <Text className="wov-button-loc">
-                {wo_info.activity.fs.ho.lot.development.name} | Lot{" "}
-                {wo_info.activity.fs.ho.lot.code}
+                {wo_info.work_order_items[0].development.name} | Lot{" "}
+                {wo_info.work_order_items[0].house_order.lot._code}
               </Text>
             </div>
           </div>
@@ -578,7 +566,6 @@ const WorkOrderHO = ({ wo_info }) => {
             <p>Item:</p>
           </div>
           <div className="wov-panel-info">
-            {/* <p>test{ho_data.kernel_house_order_calculated[0].id}test</p> */}
             <p id="plan">
               {ho_data?.kernel_house_order_calculated[0]?.model_configuration
                 ?.model?.name || "-"}
@@ -727,6 +714,27 @@ const GET_WO_APPROVAL_ID = gql`
       }
     ) {
       work_order_id
+      work_order {
+        id
+        work_order_items {
+          amount
+          cost_type {
+            name
+            cost_category {
+              name
+            }
+          }
+          development {
+            name
+          }
+          house_order {
+            id
+            lot {
+              _code
+            }
+          }
+        }
+      }
     }
   }
 `;
@@ -734,78 +742,100 @@ export const SOWWOApprovals = () => {
   const { loading, error, data } = useQuery(GET_WO_APPROVAL_ID, {
     variables: {
       vendorId: vendor_id,
-      dateStart: "2022-06-27",
+      dateStart: "2022-07-19",
       dateEnd: "2022-12-25",
     },
   });
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
-  return data.kernel_work_order_approval.map((info) => (
-    <SOWWOId id={info.work_order_id} />
-  ));
-};
-const GET_WO_FROM_ID = gql`
-  query GetWOFromID($WOId: Int) {
-    kernel_work_order(where: { id: { _eq: $WOId } }) {
-      id
-      vendor_id
-      activity {
-        fs: field_schedule {
-          ho: house_order {
-            lot {
-              code: _code
-              development {
-                name
-              }
-            }
-            id
-          }
-        }
-        planned_duration
-        planned_end
-        planned_start
-        status
-      }
-      work_order_items(where: { amount: { _gt: "0" } }) {
-        amount
-        cost_type {
-          name
-          cost_category {
-            name
-          }
-        }
-      }
-      type
-      notes
-    }
-  }
-`;
-export const SOWWOId = ({ id }) => {
-  const { loading, error, data } = useQuery(GET_WO_FROM_ID, {
-    variables: {
-      WOId: id,
-    },
-  });
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error 0</p>;
-  // return <></>;
-  return data.kernel_work_order.map((info) => {
+  console.log(data.kernel_work_order_approval.length);
+  return data.kernel_work_order_approval.map((info) => {
     if (
-      info.activity === null ||
-      info.activity.fs === null ||
-      info.activity.fs.ho === null ||
-      info.activity.fs.ho.lot === null ||
-      info.work_order_items.length === 0
+      info.work_order.work_order_items.length === 0 ||
+      info.work_order.work_order_items[0].development === null ||
+      info.work_order.work_order_items[0].development.name === null ||
+      info.work_order.work_order_items[0].house_order === null
     ) {
       return <></>;
     }
-
+    // var is_valid_loc = false;
+    // for (var i = 0; i < lots.length; i++) {
+    //   if (
+    //     lots[i].lot === wo_info.work_order_items[0].house_order.lot._code &&
+    //     lots[i].dev === wo_info.work_order_items[0].development.name
+    //   ) {
+    //     is_valid_loc = true;
+    //   }
+    // }
+    // if (!is_valid_loc) {
+    //   return <></>;
+    // }
+    // return <></>;
     return <SOWWOPlanElevation info={info} />;
   });
 };
+// const GET_WO_FROM_ID = gql`
+//   query GetWOFromID($WOId: Int) {
+//     kernel_work_order(where: { id: { _eq: $WOId } }) {
+//       id
+//       vendor_id
+//       activity {
+//         fs: field_schedule {
+//           ho: house_order {
+//             lot {
+//               code: _code
+//               development {
+//                 name
+//               }
+//             }
+//             id
+//           }
+//         }
+//         planned_duration
+//         planned_end
+//         planned_start
+//         status
+//       }
+//       work_order_items(where: { amount: { _gt: "0" } }) {
+//         amount
+//         cost_type {
+//           name
+//           cost_category {
+//             name
+//           }
+//         }
+//       }
+//       type
+//       notes
+//     }
+//   }
+// `;
+// export const SOWWOId = ({ id }) => {
+//   const { loading, error, data } = useQuery(GET_WO_FROM_ID, {
+//     variables: {
+//       WOId: id,
+//     },
+//   });
+//   if (loading) return <p>Loading...</p>;
+//   if (error) return <p>Error 0</p>;
+//   // return <></>;
+//   return data.kernel_work_order.map((info) => {
+//     if (
+//       info.activity === null ||
+//       info.activity.fs === null ||
+//       info.activity.fs.ho === null ||
+//       info.activity.fs.ho.lot === null ||
+//       info.work_order_items.length === 0
+//     ) {
+//       return <></>;
+//     }
+
+//     return <SOWWOPlanElevation info={info} />;
+//   });
+// };
 const SOWWOPlanElevation = ({ info }) => {
   const { loading, error, data } = useQuery(GET_PLAN_ELEVATION, {
-    variables: { hoId: info.activity.fs.ho.id },
+    variables: { hoId: info.work_order.work_order_items[0].house_order.id },
   });
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
@@ -823,10 +853,10 @@ const SOWWOPlanElevation = ({ info }) => {
               Done
             </Tag>
             <div className="wov-button-text-wrapper">
-              <Text className="wov-button-id">WO:{info.id}</Text>
+              <Text className="wov-button-id">KER:WO:{info.work_order.id}</Text>
               <Text className="wov-button-loc">
-                {info.activity.fs.ho.lot.development.name} | Lot{" "}
-                {info.activity.fs.ho.lot.code}
+                {info.work_order.work_order_items[0].development.name} | Lot{" "}
+                {info.work_order.work_order_items[0].house_order.lot._code}
               </Text>
             </div>
             <AccordionIcon />
@@ -854,7 +884,7 @@ const SOWWOPlanElevation = ({ info }) => {
               {data?.kernel_house_order_calculated[0]?.elevation_option_catalog
                 ?.name || "-"}
             </p>
-            {info.work_order_items.map((lineitem) => (
+            {info.work_order.work_order_items.map((lineitem) => (
               <p className="lineitem" key={lineitem}>
                 {lineitem.cost_type.cost_category.name} -{" "}
                 {lineitem.cost_type.name}
@@ -867,7 +897,7 @@ const SOWWOPlanElevation = ({ info }) => {
   );
 };
 
-const GET_RECORDABLES = gql`
+const TEST = gql`
   query GetRecordables($vendorId: Int) {
     kernel_task_recordable(
       where: { task: { vendor_id: { _eq: $vendorId } }, status: { _eq: todo } }
@@ -894,14 +924,16 @@ const GET_RECORDABLES = gql`
   }
 `;
 export const Recordables = () => {
-  const { loading, error, data } = useQuery(GET_RECORDABLES, {
+  const { loading, error, data } = useQuery(TEST, {
     variables: {
-      vendor_id,
+      vendorId: vendor_id,
     },
   });
+  // console.log(vendor_id);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error 0 {error.message}</p>;
   // return <></>;
+  console.log(data);
   return data.kernel_task_recordable.map((info) => {
     // if (
     //   info.activity === null ||
@@ -912,10 +944,12 @@ export const Recordables = () => {
     // ) {
     //   return <></>;
     // }
+    // console.log(info);
     const link = `https://mosaic.build/${info.task.lot.development.name_slug}/${info.task.lot._code}/${info.id}`;
     return (
       <>
         <Subdivider />
+        <p>WHAT</p>
         <Box className="punch-item-box">
           <div className="notif-item">
             <div className="bullet"></div>

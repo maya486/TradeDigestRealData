@@ -16,7 +16,7 @@ import {
   BsExclamationCircle,
   BsThreeDots,
 } from "react-icons/bs";
-import { getSchedules, GetWeekActivities } from "./firebase/test.js";
+import { getSchedules } from "./firebase/test.js";
 import { RiTruckLine } from "react-icons/ri";
 import logo from "./images/logo.png";
 import {
@@ -48,10 +48,10 @@ import {
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { getAuth, signInAnonymously } from "firebase/auth";
-import { WeekActivities } from "./WeekActivities";
+import { TwoWeekActivities } from "./WeekActivities";
 
 const date = "Fri Jun 10, 2022";
-const name = "Staple 3";
+const name = "Framing Legacy";
 export const CustomDivider = () => {
   return <div className="divider" />;
 };
@@ -529,8 +529,8 @@ export function App() {
           <Recordables />
         </div>
         <Text className="subsection">This Pay Period Work Orders</Text>
-        <Accordion allowMultiple className="wo-accordion">
-          <WorkOrderData />
+        <Accordion allowMultiple className="wo-accordion overflow-wrapper">
+          <WorkOrderData lots={lots} />
           <SOWWOApprovals />
         </Accordion>
         {/* <Accordion allowMultiple className="wo-accordion">
@@ -616,7 +616,7 @@ export function App() {
               name="Framing Siding"
             /> */}
             {/* <Schedule date_start="2022-06-06" date_end="2022-06-12" /> */}
-            <WeekActivities activities={activities} setLots={setLots} />
+            <TwoWeekActivities activities={activities} setLots={setLots} />
             {/* <Schedule date_start="2022-06-13" date_end="2022-06-19" /> */}
             {/* <TimelineItem
               loc="Jasper 1C | Lot 6"

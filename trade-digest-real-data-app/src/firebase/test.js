@@ -64,7 +64,8 @@ const activityNames = [
   "2nd Floor Frame",
   "Framing Snap lines",
 ];
-const vendor_names = ["STAPLE 3 LAND & CATTLE, LLC", "Staple 3 Land & Cattle"];
+// const vendor_names = ["STAPLE 3 LAND & CATTLE, LLC", "Staple 3 Land & Cattle"];
+const vendor_names = ["Legacy Framing LLC"];
 const getActivities = async ({ id, development, lot }) => {
   try {
     const activitiesRef = collection(db, `schedule/${id}/activities`);
@@ -185,7 +186,7 @@ export const GetWeekActivities = ({ filtered }) => {
                 <p className="timeline-item-name">{activity.title}</p>
                 <div className="timeline-item-details">
                   <p className="timeline-item-loc">
-                    {activity.dev} | {activity.lot}
+                    {activity.dev} | Lot {activity.lot}
                   </p>
                   <p>
                     {start} - {end}

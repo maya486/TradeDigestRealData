@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { TimelineNode } from "./components/TimelineNode";
 import { filterActivitiesByDate, GetWeekActivities } from "./firebase/test";
 
-export const WeekActivities = ({ activities, setLots }) => {
+export const TwoWeekActivities = ({ activities, setLots }) => {
   const firstWeek = useMemo(() => {
     return filterActivitiesByDate({
       activities: activities,
@@ -26,9 +26,13 @@ export const WeekActivities = ({ activities, setLots }) => {
   return (
     <>
       <TimelineNode isRed={true} text="This Week: July 18 - July 24" />
-      <GetWeekActivities filtered={firstWeek?.filtered || []} />
+      <div className="overflow-wrapper">
+        <GetWeekActivities filtered={firstWeek?.filtered || []} />
+      </div>
       <TimelineNode text="Next Week: July 25 - July 31" />
-      <GetWeekActivities filtered={secondWeek?.filtered || []} />
+      <div className="overflow-wrapper">
+        <GetWeekActivities filtered={secondWeek?.filtered || []} />
+      </div>
       <TimelineNode text="Following Week: August 1 - August 7" />
     </>
   );
