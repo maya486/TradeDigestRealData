@@ -35,7 +35,16 @@ import {
   where,
 } from "firebase/firestore";
 import { TbChevronsDownLeft } from "react-icons/tb";
-import { toDate, parseISO, format, parse } from "date-fns";
+import {
+  isAfter,
+  format,
+  parse,
+  isSameDay,
+  differenceInDays,
+  endOfWeek,
+  differenceInHours,
+  differenceInMinutes,
+} from "date-fns";
 import { useEffect, useMemo } from "react";
 
 const firebaseConfig = {
@@ -117,14 +126,6 @@ export const getSchedules = async () => {
     const activities_list = [];
     activities.forEach((schedule) => {
       schedule.forEach((activity) => {
-        // let dates = "";
-        // activity.dates.forEach(({ date }) => {
-        //   dates += date;
-        //   dates += " ";
-        // });
-        // if (typeof activity.dates === "string") {
-
-        // }
         activities_list.push({
           dev: activity.development,
           lot: activity.lot,
@@ -163,6 +164,7 @@ export const filterActivitiesByDate = ({
       lots.push({ dev: activity.dev, lot: activity.lot });
     }
   });
+  filtered.sort((a, b) => differenceInDays(a.start, b.start));
   return { lots, filtered };
 };
 
@@ -172,8 +174,17 @@ export const GetWeekActivities = ({ filtered }) => {
     <>
       {filtered.map((activity) => {
         try {
-          const start = format(activity.start, "ccc");
-          const end = format(activity.end, "ccc");
+          var date;
+          if (isSameDay(activity.start, activity.end)) {
+            date = format(activity.start, "ccc");
+          } else {
+            date = format(activity.start, "ccc") + " - ";
+            if (isAfter(activity.end, endOfWeek(activity.start))) {
+              date += format(activity.end, "ccc MMM d");
+            } else {
+              date += format(activity.end, "ccc");
+            }
+          }
 
           return (
             <>
@@ -188,27 +199,10 @@ export const GetWeekActivities = ({ filtered }) => {
                   <p className="timeline-item-loc">
                     {activity.dev} | Lot {activity.lot}
                   </p>
-                  <p>
-                    {start} - {end}
-                  </p>
+                  <p>{date}</p>
                 </div>
               </Box>
             </>
-            // <Box
-            //   className="timeline-item-box"
-            //   boxShadow={"md"}
-            //   css={{ padding: "10px 20px", margin: "10px" }}
-            // >
-            //   <p className="timeline-item-name">{activity.title}</p>
-            //   <div className="timeline-item-details">
-            //     <p className="timeline-item-loc">
-            //       {activity.dev} | {activity.lot}
-            //     </p>
-            //     <p>
-            //       {start} - {end}
-            //     </p>
-            //   </div>
-            // </Box>
           );
         } catch (err) {
           console.log("err");

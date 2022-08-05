@@ -4,7 +4,20 @@ import React, { useState } from "react";
 import { BiGift } from "react-icons/bi";
 import { FiExternalLink } from "react-icons/fi";
 import { TbCircleCheck } from "react-icons/tb";
-import { toDate, parseISO, format } from "date-fns";
+import {
+  toDate,
+  parseISO,
+  format,
+  subWeeks,
+  startOfDay,
+  startOfMonth,
+  addDays,
+  isFuture,
+  endOfMonth,
+  differenceInHours,
+  differenceInMinutes,
+  differenceInDays,
+} from "date-fns";
 import { CustomIcon, CustomDivider, Subdivider } from "./App.js";
 
 import {
@@ -42,6 +55,16 @@ import { CheckIcon, InfoIcon } from "@chakra-ui/icons";
 //   DayPickerRangeController,
 // } from "react-dates";
 
+const now = new Date();
+const week_ago = subWeeks(now, 1);
+export const current = startOfDay(new Date());
+var start_pay_period = startOfMonth(current);
+var end_pay_period = addDays(startOfMonth(current), 14);
+if (!isFuture(end_pay_period)) {
+  start_pay_period = end_pay_period;
+  end_pay_period = addDays(endOfMonth(current), 1);
+}
+
 const GET_DEVELOPMENT = gql`
   query GetDevelopment($vendor_id: Int!) {
     kernel_development_vendor_selection(
@@ -76,6 +99,9 @@ const GET_START_LETTER = gql`
       lot {
         _code
         id
+        house_orders {
+          id
+        }
       }
       development {
         name
@@ -164,7 +190,10 @@ const DocDev = ({ dev_info }) => {
     error: doc_error,
     data: doc_data,
   } = useQuery(GET_DOC_UPDATES, {
-    variables: { date: "2022-07-27", developmentId: dev_info.development_id },
+    variables: {
+      date: format(week_ago, "yyyy-MM-dd"),
+      developmentId: dev_info.development_id,
+    },
   });
   if (doc_loading) return <p>Loading...</p>;
   if (doc_error) return <p>{doc_error.message}</p>;
@@ -177,6 +206,17 @@ const DocDev = ({ dev_info }) => {
       doc_info.filename === null
     ) {
       return <></>;
+    }
+    const updated_at = toDate(parseISO(doc_info.updated_at));
+    var time;
+    if (differenceInDays(now, updated_at) > 1) {
+      time = differenceInDays(now, updated_at) + "d";
+    } else {
+      if (differenceInHours(now, updated_at) > 1) {
+        time = differenceInHours(now, updated_at) + "h";
+      } else {
+        time = differenceInMinutes(now, updated_at) + "m";
+      }
     }
     return (
       <>
@@ -191,7 +231,7 @@ const DocDev = ({ dev_info }) => {
             </p>
             <p className="notif-details">{doc_info.filename}</p>
           </div>
-          <p className="notif-time">time</p>
+          <p className="notif-time">{time}</p>
         </div>
       </>
     );
@@ -207,17 +247,80 @@ const StartLetterDev = ({ dev_info, lots }) => {
   });
   if (sl_loading) return <p>Loading...</p>;
   if (sl_error) return <p>Error 1 {dev_info.development_id}</p>;
-  return sl_data.kernel_delivery_document.map((sl_info) => (
-    <StartLetterSL
-      sl_info={sl_info}
-      lot_code={sl_info?.lot?._code}
-      updated_at={sl_info.updated_at}
-      dev_name={dev_info.development.name}
-      lots={lots}
-    />
-  ));
+
+  return sl_data.kernel_delivery_document.map((sl_info) => {
+    if (
+      sl_info?.lot?._code === null ||
+      dev_info.development.name === null ||
+      sl_info.lot.house_orders.id === null
+    ) {
+      return <></>;
+    }
+    var is_valid_loc = false;
+    for (var i = 0; i < lots.length; i++) {
+      if (
+        lots[i].lot === sl_info.lot._code &&
+        lots[i].dev === dev_info.development.name
+      ) {
+        is_valid_loc = true;
+      }
+    }
+    if (!is_valid_loc) {
+      return <></>;
+    }
+    return (
+      <StartLetterSL
+        sl_info={sl_info}
+        lot_code={sl_info?.lot?._code}
+        updated_at={sl_info.updated_at}
+        dev_name={dev_info.development.name}
+        lots={lots}
+        ho_id={sl_info.lot.house_orders.id}
+      />
+    );
+  });
 };
-const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
+const StartLetterSL = ({
+  sl_info,
+  lot_code,
+  updated_at,
+  dev_name,
+  lots,
+  ho_id,
+}) => {
+  const { loading, error, data } = useQuery(GET_PLAN_ELEVATION, {
+    variables: { hoId: ho_id },
+  });
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <StartLetterHO
+      sl_info={sl_info}
+      lot_code={lot_code}
+      updated_at={updated_at}
+      dev_name={dev_name}
+      lots={lots}
+      plan={
+        data.kernel_house_order_calculated[0]?.model_configuration?.model
+          ?.name || "-"
+      }
+      elevation={
+        data.kernel_house_order_calculated[0]?.elevation_option_catalog?.name ||
+        "-"
+      }
+    />
+  );
+};
+const StartLetterHO = ({
+  sl_info,
+  lot_code,
+  updated_at,
+  dev_name,
+  lots,
+  plan,
+  elevation,
+}) => {
   const {
     loading: url_loading,
     error: url_error,
@@ -232,15 +335,7 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
     toDate(parseISO(updated_at)),
     "MM/dd/yyyy"
   );
-  var is_valid_loc = false;
-  for (var i = 0; i < lots.length; i++) {
-    if (lots[i].lot === lot_code && lots[i].dev === dev_name) {
-      is_valid_loc = true;
-    }
-  }
-  if (!is_valid_loc) {
-    return <></>;
-  }
+
   return (
     <div className="start-letter-wrapper">
       <div className="start-letter-text">
@@ -248,7 +343,7 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
           {dev_name} | Lot {lot_code}
         </Text>
         <Text className="start-letter-plan-elevation">
-          Plan: - | Elevation: -
+          Plan: {plan} | Elevation: {elevation}
         </Text>
         <Text className="start-letter-date">
           Last Updated: {converted_updated_at}
@@ -274,14 +369,14 @@ const StartLetterSL = ({ sl_info, lot_code, updated_at, dev_name, lots }) => {
   );
 };
 const GET_WO_APPROVALS = gql`
-  query GetWOApprovals($vendorId: Int, $date: timestamp!) {
+  query GetWOApprovals($date: timestamp!, $vendorId: Int) {
     kernel_work_order_approval(
       where: {
-        work_order: {
-          vendor_id: { _eq: $vendorId }
-          updated_at: { _gte: $date }
-        }
+        work_order: { vendor_id: { _eq: $vendorId } }
+        timestamp: { _gte: $date }
       }
+      order_by: { work_order_id: asc, timestamp: desc_nulls_last }
+      distinct_on: work_order_id
     ) {
       approved_by_user {
         first_name
@@ -289,20 +384,19 @@ const GET_WO_APPROVALS = gql`
       }
       work_order {
         id
-        activity {
-          fs: field_schedule {
-            ho: house_order {
-              lot {
-                code: _code
-                development {
-                  name
-                }
-              }
+        work_order_items {
+          development {
+            name
+          }
+          house_order {
+            lot {
+              _code
             }
           }
         }
       }
       updated_at
+      timestamp
     }
   }
 `;
@@ -312,7 +406,7 @@ export const WorkOrderApprovals = () => {
     error: woa_error,
     data: woa_data,
   } = useQuery(GET_WO_APPROVALS, {
-    variables: { date: "2022-01-25", vendorId: vendor_id },
+    variables: { date: format(week_ago, "yyyy-MM-dd"), vendorId: vendor_id },
   });
   if (woa_loading) return <p>Loading...</p>;
   if (woa_error) return <p>{woa_error.message}</p>;
@@ -321,15 +415,20 @@ export const WorkOrderApprovals = () => {
       {woa_data.kernel_work_order_approval.map((woa_info) => {
         if (
           woa_info.work_order === null ||
-          // woa_info.work_order.work_order_items.length === 0
-          woa_info.work_order.activity === null ||
-          woa_info.work_order.activity.fs === null ||
-          woa_info.work_order.activity.fs.ho === null ||
-          woa_info.work_order.activity.fs.ho.lot === null ||
-          woa_info.work_order.activity.fs.ho.lot.development === null ||
-          woa_info.work_order.activity.fs.ho.lot.development.name === null
+          woa_info.work_order.work_order_items.length === 0
         ) {
           return <></>;
+        }
+        const updated_at = toDate(parseISO(woa_info.timestamp));
+        var time;
+        if (differenceInDays(now, updated_at) > 1) {
+          time = differenceInDays(now, updated_at) + "d";
+        } else {
+          if (differenceInHours(now, updated_at) > 1) {
+            time = differenceInHours(now, updated_at) + "h";
+          } else {
+            time = differenceInMinutes(now, updated_at) + "m";
+          }
         }
         return (
           <>
@@ -340,8 +439,12 @@ export const WorkOrderApprovals = () => {
                 <p className="notif-name">Work order has been approved</p>
                 <p className="notif-id">KER:{woa_info.work_order.id}</p>
                 <p className="notif-loc">
-                  {woa_info.work_order.activity.fs.ho.lot.development.name} |
-                  Lot {woa_info.work_order.activity.fs.ho.lot.code}
+                  {woa_info.work_order.work_order_items[0].development.name} |
+                  Lot{" "}
+                  {
+                    woa_info.work_order.work_order_items[0].house_order.lot
+                      ._code
+                  }
                 </p>
                 {woa_data.approved_by_user != null && (
                   <p className="notif-details">
@@ -350,7 +453,7 @@ export const WorkOrderApprovals = () => {
                   </p>
                 )}
               </div>
-              <p className="notif-time">time</p>
+              <p className="notif-time">{time}</p>
             </div>
           </>
         );
@@ -359,24 +462,21 @@ export const WorkOrderApprovals = () => {
   );
 };
 const GET_WO_UPDATES = gql`
-  query GetWOUpdates($vendorId: Int, $date: timestamp!) {
+  query GetWOUpdates($date: timestamp!, $vendorId: Int) {
     kernel_work_order(
       where: { updated_at: { _gte: $date }, vendor_id: { _eq: $vendorId } }
-      limit: 5
     ) {
       id
       notes
       updated_at
-      activity {
-        s: _source_id
-        fs: field_schedule {
-          ho: house_order {
-            lot {
-              code: _code
-              development {
-                name
-              }
-            }
+      work_order_items {
+        amount
+        development {
+          name
+        }
+        house_order {
+          lot {
+            _code
           }
         }
       }
@@ -389,22 +489,27 @@ export const WorkOrderUpdates = () => {
     error: wou_error,
     data: wou_data,
   } = useQuery(GET_WO_UPDATES, {
-    variables: { date: "2022-06-25", vendorId: vendor_id },
+    variables: { date: format(week_ago, "yyyy-MM-dd"), vendorId: vendor_id },
   });
   if (wou_loading) return <p>Loading...</p>;
   if (wou_error) return <p>{wou_error.message}</p>;
   return (
     <>
       {wou_data.kernel_work_order.map((wou_info) => {
-        if (
-          wou_info.activity === null ||
-          wou_info.activity.fs === null ||
-          wou_info.activity.fs.ho === null ||
-          wou_info.activity.fs.ho.lot === null
-        ) {
+        if (wou_info.work_order_items.length === 0) {
           return <></>;
         }
-        // incNum();
+        const updated_at = toDate(parseISO(wou_info.updated_at));
+        var time;
+        if (differenceInDays(now, updated_at) > 1) {
+          time = differenceInDays(now, updated_at) + "d";
+        } else {
+          if (differenceInHours(now, updated_at) > 1) {
+            time = differenceInHours(now, updated_at) + "h";
+          } else {
+            time = differenceInMinutes(now, updated_at) + "m";
+          }
+        }
         return (
           <>
             <CustomDivider />
@@ -414,12 +519,12 @@ export const WorkOrderUpdates = () => {
                 <p className="notif-name">Work order has been updated</p>
                 <p className="notif-id">KER:{wou_info.id}</p>
                 <p className="notif-loc">
-                  {wou_info.activity.fs.ho.lot.development.name} | Lot{" "}
-                  {wou_info.activity.fs.ho.lot.code}
+                  {wou_info.work_order_items[0].development.name} | Lot{" "}
+                  {wou_info.work_order_items[0].house_order.lot._code}
                 </p>
                 <p className="notif-details">{wou_info.notes}</p>
               </div>
-              <p className="notif-time">time</p>
+              <p className="notif-time">{time}</p>
             </div>
           </>
         );
@@ -586,118 +691,118 @@ const WorkOrderHO = ({ wo_info }) => {
     </AccordionItem>
   );
 };
-const GET_SCHEDULE = gql`
-  query GetSchedule($vendorId: Int!, $dateStart: date, $dateEnd: date) {
-    kernel_work_order(
-      where: {
-        activity: { planned_start: { _gte: $dateStart, _lte: $dateEnd } }
-        vendor_id: { _eq: $vendorId }
-      }
-      order_by: { activity: { planned_start: asc } }
-    ) {
-      id
-      vendor_id
-      activity {
-        fs: field_schedule {
-          ho: house_order {
-            lot {
-              code: _code
-              development {
-                name
-              }
-            }
-            id
-          }
-        }
-        planned_duration
-        planned_end
-        planned_start
-        status
-      }
-      work_order_items(where: { amount: { _gt: "0" } }) {
-        amount
-        cost_type {
-          name
-          cost_category {
-            name
-          }
-        }
-      }
-      type
-      notes
-    }
-  }
-`;
-export const Schedule = ({ date_start, date_end }) => {
-  const {
-    loading: s_loading,
-    error: s_error,
-    data: s_data,
-  } = useQuery(GET_SCHEDULE, {
-    variables: {
-      dateStart: date_start,
-      dateEnd: date_end,
-      vendorId: vendor_id,
-    },
-  });
-  if (s_loading) return <p>Loading...</p>;
-  if (s_error) return <p>{s_error.message}</p>;
-  // return <p>test</p>;
+// const GET_SCHEDULE = gql`
+//   query GetSchedule($vendorId: Int!, $dateStart: date, $dateEnd: date) {
+//     kernel_work_order(
+//       where: {
+//         activity: { planned_start: { _gte: $dateStart, _lte: $dateEnd } }
+//         vendor_id: { _eq: $vendorId }
+//       }
+//       order_by: { activity: { planned_start: asc } }
+//     ) {
+//       id
+//       vendor_id
+//       activity {
+//         fs: field_schedule {
+//           ho: house_order {
+//             lot {
+//               code: _code
+//               development {
+//                 name
+//               }
+//             }
+//             id
+//           }
+//         }
+//         planned_duration
+//         planned_end
+//         planned_start
+//         status
+//       }
+//       work_order_items(where: { amount: { _gt: "0" } }) {
+//         amount
+//         cost_type {
+//           name
+//           cost_category {
+//             name
+//           }
+//         }
+//       }
+//       type
+//       notes
+//     }
+//   }
+// `;
+// export const Schedule = ({ date_start, date_end }) => {
+//   const {
+//     loading: s_loading,
+//     error: s_error,
+//     data: s_data,
+//   } = useQuery(GET_SCHEDULE, {
+//     variables: {
+//       dateStart: date_start,
+//       dateEnd: date_end,
+//       vendorId: vendor_id,
+//     },
+//   });
+//   if (s_loading) return <p>Loading...</p>;
+//   if (s_error) return <p>{s_error.message}</p>;
+//   // return <p>test</p>;
 
-  // return <p>test</p>;
-  return (
-    <>
-      {s_data.kernel_work_order.map((s_info) => {
-        if (
-          // woa_info.work_order.work_order_items.length === 0
-          s_info.activity === null ||
-          s_info.activity.fs === null ||
-          s_info.activity.fs.ho === null ||
-          s_info.activity.fs.ho.lot === null ||
-          s_info.activity.fs.ho.lot.development === null ||
-          s_info.activity.fs.ho.lot.development.name === null ||
-          s_info.work_order_items.length === 0 ||
-          s_info.activity.planned_start === null ||
-          s_info.activity.planned_end === null
-        ) {
-          return <></>;
-        }
-        const start = format(
-          toDate(parseISO(s_info.activity.planned_start)),
-          "MM/dd"
-        );
-        const end = format(
-          toDate(parseISO(s_info.activity.planned_end)),
-          "MM/dd"
-        );
-        // return <></>;
+//   // return <p>test</p>;
+//   return (
+//     <>
+//       {s_data.kernel_work_order.map((s_info) => {
+//         if (
+//           // woa_info.work_order.work_order_items.length === 0
+//           s_info.activity === null ||
+//           s_info.activity.fs === null ||
+//           s_info.activity.fs.ho === null ||
+//           s_info.activity.fs.ho.lot === null ||
+//           s_info.activity.fs.ho.lot.development === null ||
+//           s_info.activity.fs.ho.lot.development.name === null ||
+//           s_info.work_order_items.length === 0 ||
+//           s_info.activity.planned_start === null ||
+//           s_info.activity.planned_end === null
+//         ) {
+//           return <></>;
+//         }
+//         const start = format(
+//           toDate(parseISO(s_info.activity.planned_start)),
+//           "MM/dd"
+//         );
+//         const end = format(
+//           toDate(parseISO(s_info.activity.planned_end)),
+//           "MM/dd"
+//         );
+//         // return <></>;
 
-        return (
-          <>
-            <div className="timeline-divider" />
-            <Box
-              className="timeline-item-box"
-              css={{ padding: "0px 15px", margin: "10px" }}
-            >
-              <p className="timeline-item-name">
-                {s_info.work_order_items[0].cost_type.cost_category.name}
-              </p>
-              <div className="timeline-item-details">
-                <p className="timeline-item-loc">
-                  {s_info.activity.fs.ho.lot.development.name} |{" "}
-                  {s_info.activity.fs.ho.lot.code}
-                </p>
-                <p>
-                  {start} - {end}
-                </p>
-              </div>
-            </Box>
-          </>
-        );
-      })}
-    </>
-  );
-};
+//         return (
+//           <>
+//             <div className="timeline-divider" />
+//             <Box
+//               className="timeline-item-box"
+//               css={{ padding: "0px 15px", margin: "10px" }}
+//             >
+//               <p className="timeline-item-name">
+//                 {s_info.work_order_items[0].cost_type.cost_category.name}
+//               </p>
+//               <div className="timeline-item-details">
+//                 <p className="timeline-item-loc">
+//                   {s_info.activity.fs.ho.lot.development.name} |{" "}
+//                   {s_info.activity.fs.ho.lot.code}
+//                 </p>
+//                 <p>
+//                   {start} - {end}
+//                 </p>
+//               </div>
+//             </Box>
+//           </>
+//         );
+//       })}
+//     </>
+//   );
+// };
 
 const GET_WO_APPROVAL_ID = gql`
   query GetWOApprovalId(
@@ -712,6 +817,7 @@ const GET_WO_APPROVAL_ID = gql`
           updated_at: { _gte: $dateStart, _lte: $dateEnd }
         }
       }
+      distinct_on: work_order_id
     ) {
       work_order_id
       work_order {
@@ -742,13 +848,14 @@ export const SOWWOApprovals = () => {
   const { loading, error, data } = useQuery(GET_WO_APPROVAL_ID, {
     variables: {
       vendorId: vendor_id,
-      dateStart: "2022-07-19",
-      dateEnd: "2022-12-25",
+
+      dateStart: format(start_pay_period, "yyyy-MM-dd"),
+      dateEnd: format(end_pay_period, "yyyy-MM-dd"),
     },
   });
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
-  console.log(data.kernel_work_order_approval.length);
+  // console.log(data.kernel_work_order_approval.length);
   return data.kernel_work_order_approval.map((info) => {
     if (
       info.work_order.work_order_items.length === 0 ||
@@ -933,7 +1040,7 @@ export const Recordables = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error 0 {error.message}</p>;
   // return <></>;
-  console.log(data);
+  // console.log(data);
   return data.kernel_task_recordable.map((info) => {
     // if (
     //   info.activity === null ||

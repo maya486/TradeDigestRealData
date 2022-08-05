@@ -49,8 +49,30 @@ import {
 import { CheckIcon } from "@chakra-ui/icons";
 import { getAuth, signInAnonymously } from "firebase/auth";
 import { TwoWeekActivities } from "./WeekActivities";
+import {
+  format,
+  addDays,
+  startOfMonth,
+  isFuture,
+  endOfMonth,
+  startOfDay,
+  differenceInDays,
+} from "date-fns";
 
-const date = "Fri Jun 10, 2022";
+export const current = startOfDay(new Date());
+var start_pay_period = startOfMonth(current);
+var end_pay_period = addDays(startOfMonth(current), 14);
+if (!isFuture(end_pay_period)) {
+  start_pay_period = end_pay_period;
+  end_pay_period = addDays(endOfMonth(current), 1);
+}
+console.log("current");
+console.log(current);
+console.log("start");
+console.log(start_pay_period);
+console.log("end");
+console.log(end_pay_period);
+
 const name = "Framing Legacy";
 export const CustomDivider = () => {
   return <div className="divider" />;
@@ -463,7 +485,7 @@ export function App() {
             />
           </div>
 
-          <Text id="date">{date}</Text>
+          <Text id="date">{format(current, "MMM d, Y")}</Text>
         </header>
         <CustomDivider />
         <p id="greeting">Hello, {name}!</p>
@@ -498,15 +520,23 @@ export function App() {
         <Subdivider />
         <div className="upp-wrapper">
           <div className="circlegraph">
-            {[...Array(14)].map((x, i) => (
+            {[
+              ...Array(differenceInDays(end_pay_period, start_pay_period) + 1),
+            ].map((x, i) => (
               <div
-                className={`${i > 10 ? "circleB" : "circleA"}`}
+                className={`${
+                  i > differenceInDays(current, start_pay_period)
+                    ? "circleB"
+                    : "circleA"
+                }`}
                 key={i}
               ></div>
             ))}
           </div>
           <div className="inner-progress-text">
-            <Text id="countdown-text">4 Days</Text>
+            <Text id="countdown-text">
+              {differenceInDays(end_pay_period, current)} Days
+            </Text>
             <Text id="countdown-helper">Until Next Pay Run</Text>
           </div>
         </div>
