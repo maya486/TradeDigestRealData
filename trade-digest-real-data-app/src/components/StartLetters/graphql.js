@@ -27,6 +27,7 @@ export const GET_DEVELOPMENT = gql`
       development_id
       vendor_id
       development {
+        id
         name
       }
       vendor {
@@ -45,6 +46,7 @@ export const GET_START_LETTER = gql`
         development_id: { _eq: $development_id }
       }
     ) {
+      id
       filename
       s3_document_id
       version
@@ -57,6 +59,7 @@ export const GET_START_LETTER = gql`
         }
       }
       development {
+        id
         name
       }
       lot_id

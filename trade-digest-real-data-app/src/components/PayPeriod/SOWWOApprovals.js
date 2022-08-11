@@ -32,7 +32,7 @@ export const SOWWOApprovals = () => {
     ) {
       return <></>;
     }
-    return <SOWWOPlanElevation info={info} />;
+    return <SOWWOPlanElevation key={info.id} info={info} />;
   });
 };
 const SOWWOPlanElevation = ({ info }) => {

@@ -53,10 +53,11 @@ const StartLetterDev = ({ dev_info, lots }) => {
       }
     }
     if (!is_valid_loc) {
-      return <></>;
+      return null;
     }
     return (
       <StartLetterSL
+        key={sl_info.id}
         sl_info={sl_info}
         lot_code={sl_info?.lot?._code}
         updated_at={sl_info.updated_at}

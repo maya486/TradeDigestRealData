@@ -8,6 +8,7 @@ export const GET_DEVELOPMENT = gql`
       development_id
       vendor_id
       development {
+        id
         name
       }
       vendor {
@@ -27,6 +28,7 @@ export const GET_WO_UPDATES = gql`
       work_order_items {
         amount
         development {
+          id
           name
         }
         house_order {
@@ -48,6 +50,7 @@ export const GET_WO_APPROVALS = gql`
       order_by: { work_order_id: asc, timestamp: desc_nulls_last }
       distinct_on: work_order_id
     ) {
+      id
       approved_by_user {
         first_name
         last_name
@@ -56,6 +59,7 @@ export const GET_WO_APPROVALS = gql`
         id
         work_order_items {
           development {
+            id
             name
           }
           house_order {
@@ -79,6 +83,7 @@ export const GET_DOC_DATA = gql`
       development_id
       vendor_id
       development {
+        id
         name
         delivery_documents(
           where: {

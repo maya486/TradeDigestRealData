@@ -10,6 +10,7 @@ export const GET_RECORDABLES = gql`
         lot {
           _code
           development {
+            id
             name
             name_slug
           }
@@ -40,6 +41,7 @@ export const GET_WO = gql`
           }
         }
         development {
+          id
           name
         }
         house_order {
@@ -83,6 +85,7 @@ export const GET_WO_APPROVAL_ID = gql`
       }
       distinct_on: work_order_id
     ) {
+      id
       work_order_id
       work_order {
         id
@@ -95,6 +98,7 @@ export const GET_WO_APPROVAL_ID = gql`
             }
           }
           development {
+            id
             name
           }
           house_order {

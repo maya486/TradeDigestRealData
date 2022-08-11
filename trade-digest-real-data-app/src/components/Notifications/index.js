@@ -35,7 +35,7 @@ export const Notifications = () => {
             switch (notif.type) {
               case "wo-update":
                 return (
-                  <>
+                  <div key={notif.id}>
                     <CustomDivider />
                     <div className="notif-item">
                       <CustomIcon type="warning" />
@@ -51,11 +51,11 @@ export const Notifications = () => {
                       </div>
                       <p className="notif-time">{time}</p>
                     </div>
-                  </>
+                  </div>
                 );
               case "wo-approval":
                 return (
-                  <>
+                  <div key={notif.id}>
                     <CustomDivider />
                     <div className="notif-item">
                       <CustomIcon type="success" />
@@ -76,11 +76,11 @@ export const Notifications = () => {
                       </div>
                       <p className="notif-time">{time}</p>
                     </div>
-                  </>
+                  </div>
                 );
               case "doc":
                 return (
-                  <>
+                  <div key={notif.id}>
                     <CustomDivider />
                     <div className="notif-item">
                       <CustomIcon type="warning" />
@@ -94,10 +94,10 @@ export const Notifications = () => {
                       </div>
                       <p className="notif-time">{time}</p>
                     </div>
-                  </>
+                  </div>
                 );
               default:
-                return <></>;
+                return null;
             }
           })}
         </div>

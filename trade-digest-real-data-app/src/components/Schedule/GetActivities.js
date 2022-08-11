@@ -85,6 +85,7 @@ export const getSchedules = async (name) => {
     activities.forEach((schedule) => {
       schedule.forEach((activity) => {
         activities_list.push({
+          id: activity.id,
           dev: activity.development,
           lot: activity.lot,
           title: activity.title,
@@ -145,8 +146,7 @@ export const GetWeekActivities = ({ filtered }) => {
           }
 
           return (
-            <>
-              {/* <Subdivider /> */}
+            <div key={activity.id}>
               <div className="timeline-divider" />
               <Box
                 className="timeline-item-box"
@@ -160,7 +160,7 @@ export const GetWeekActivities = ({ filtered }) => {
                   <p>{date}</p>
                 </div>
               </Box>
-            </>
+            </div>
           );
         } catch (err) {
           console.log("err");

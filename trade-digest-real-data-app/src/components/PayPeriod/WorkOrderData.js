@@ -39,9 +39,9 @@ export const WorkOrderData = ({ lots }) => {
       }
     }
     if (!is_valid_loc) {
-      return <></>;
+      return null;
     }
-    return <WorkOrderHO wo_info={wo_info} />;
+    return <WorkOrderHO key={wo_info.id} wo_info={wo_info} />;
   });
 };
 const WorkOrderHO = ({ wo_info }) => {
