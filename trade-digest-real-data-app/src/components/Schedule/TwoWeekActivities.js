@@ -1,11 +1,20 @@
 import React, { useEffect, useMemo } from "react";
-import { TimelineNode } from "./components/TimelineNode";
-import { filterActivitiesByDate, GetWeekActivities } from "./firebase/test";
+// import { TimelineNode } from "../TimelineNode";
+import { filterActivitiesByDate, GetWeekActivities } from "./GetActivities";
 import { addWeeks, startOfWeek, format, endOfWeek, startOfDay } from "date-fns";
 export const current = startOfDay(new Date());
 const this_week = startOfWeek(current);
 const next_week = addWeeks(this_week, 1);
 const following_week = addWeeks(this_week, 2);
+
+const TimelineNode = ({ isRed = false, text }) => {
+  return (
+    <div className="timeline-node">
+      <div className="timeline-bullet" />
+      <div className="timeline-node-text">{text}</div>
+    </div>
+  );
+};
 
 export const TwoWeekActivities = ({ activities, setLots }) => {
   const firstWeek = useMemo(() => {
@@ -38,7 +47,7 @@ export const TwoWeekActivities = ({ activities, setLots }) => {
           " - " +
           format(endOfWeek(this_week), "MMM d")
         }
-      ></TimelineNode>
+      />
       <div className="overflow-wrapper">
         <GetWeekActivities filtered={firstWeek?.filtered || []} />
       </div>

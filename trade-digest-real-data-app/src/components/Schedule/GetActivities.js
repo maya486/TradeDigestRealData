@@ -1,32 +1,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
-import {
-  Text,
-  ChakraProvider,
-  Box,
-  CircularProgress,
-  LinkBox,
-  LinkOverlay,
-  Button,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Tag,
-  TagLabel,
-  TagLeftIcon,
-  Icon,
-  Stack,
-  Spacer,
-  VStack,
-} from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import {
   getFirestore,
   collection,
@@ -34,7 +9,6 @@ import {
   getDocs,
   where,
 } from "firebase/firestore";
-import { TbChevronsDownLeft } from "react-icons/tb";
 import {
   isAfter,
   format,
@@ -42,10 +16,7 @@ import {
   isSameDay,
   differenceInDays,
   endOfWeek,
-  differenceInHours,
-  differenceInMinutes,
 } from "date-fns";
-import { useEffect, useMemo } from "react";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_apiKey,
@@ -62,26 +33,12 @@ const createFirebaseApp = () => {
 };
 
 const db = getFirestore(createFirebaseApp());
-const activityNames = [
-  "Lumber Drop",
-  "Pick Up All Rough Trades",
-  "Framing - Truss Drop",
-  "Framing - Truss Drop Final",
-  "Strap & Sheer Inspection - Building Department",
-  "Framing Pickup",
-  "1st Floor Frame",
-  "2nd Floor Frame",
-  "Framing Snap lines",
-];
-// const vendor_names = ["STAPLE 3 LAND & CATTLE, LLC", "Staple 3 Land & Cattle"];
-const vendor_names = ["Legacy Framing LLC"];
-const getActivities = async ({ id, development, lot }) => {
+const getActivities = async ({ id, development, lot, name }) => {
   try {
     const activitiesRef = collection(db, `schedule/${id}/activities`);
     const activitiesQuery = await query(
       activitiesRef,
-      where("vendor", "in", vendor_names)
-      // where("title", "in", activityNames)
+      where("vendor", "==", name)
     );
     const activities = await getDocs(activitiesQuery);
     const activitiesData = activities.docs.map(async (activity) => {
@@ -100,7 +57,7 @@ const getActivities = async ({ id, development, lot }) => {
   }
 };
 
-export const getSchedules = async () => {
+export const getSchedules = async (name) => {
   try {
     const scheduleRef = collection(db, "schedule");
     const scheduleQuery = await query(
@@ -119,6 +76,7 @@ export const getSchedules = async () => {
         id: doc.id,
         development: doc.data().developmentName,
         lot: doc.data().lotCode,
+        name: name,
       });
     });
     const activitiesPromises = scheduleIds.map(getActivities);
