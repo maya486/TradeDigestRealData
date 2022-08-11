@@ -7,6 +7,7 @@ import {
 } from "react-icons/bs";
 import { RiTruckLine } from "react-icons/ri";
 import { Icon } from "@chakra-ui/react";
+import { IoInformationCircleSharp } from "react-icons/io5";
 
 export const CustomDivider = () => {
   return <div className="divider" />;
@@ -22,6 +23,10 @@ export const CustomIcon = ({ type }) => {
     case "success":
       return (
         <Icon as={BsFillCheckCircleFill} w="16px" h="16px" color="#31A881" />
+      );
+    case "info":
+      return (
+        <Icon as={IoInformationCircleSharp} w="16px" h="16px" color="#747F8F" />
       );
     case "Delivered":
       return <Icon as={TbCircleCheck} w="16px" h="16px" color="#3E4C63" />;

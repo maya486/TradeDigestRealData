@@ -15,6 +15,30 @@ export const Notifications = () => {
   notifs = notifs.concat(WorkOrderApprovals());
   notifs = notifs.concat(WorkOrderUpdates());
   notifs = notifs.concat(DocData());
+  if (notifs.length === 0) {
+    return (
+      <>
+        <ReportHeader text="Notifications" />
+        <div className="overflow-wrapper">
+          <div className="notifs">
+            <CustomDivider />
+            <div className="notif-item">
+              <CustomIcon type="info" />
+              <div className="notif-item-text">
+                <p className="notif-name">
+                  No Notifications from the past 7 days!
+                </p>
+                <p className="notif-id">
+                  Stay tuned! When there are work order or document updates,
+                  they will show up here.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
   notifs.sort((a, b) => differenceInMinutes(b.timestamp, a.timestamp));
   return (
     <>

@@ -227,9 +227,9 @@
 
 .subsection {
   /* text-align:start; */
-  color: #04203E;
+  color: #3E4C63;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 16px;
   padding-left:18px;
 }
 
@@ -511,6 +511,28 @@
   color: #04203E;
   font-weight: 700;
   font-size: 16px;
+}
+
+#no-items-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+#all-done {
+  color: #3E4C63;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#no-items-details {
+  color: #8D95A2;
+  font-size: 14px;
+  font-weight: 350;
+  text-align: center;
+  max-width: 300px;
+  padding: 10px 0 70px;
 }
 
 .timeline-item-details {

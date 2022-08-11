@@ -9,25 +9,26 @@ import { useEffect } from "react";
 
 export const PayPeriod = ({ lots }) => {
   const { end_pay_period, start_pay_period, current } = useDates();
-  useEffect(() => {
-    document.querySelectorAll(".circlegraph").forEach((circlegraph) => {
-      let circles = circlegraph.querySelectorAll(".circleA, .circleB");
-      let angle = 360 - 90,
-        dangle = 360 / circles.length;
-      angle -= dangle;
-      for (let i = 0; i < circles.length; ++i) {
-        let circle = circles[i];
-        angle += dangle;
-        circle.style.transform = `rotate(${angle}deg) translate(${
-          circlegraph.clientWidth / 2
-        }px) rotate(-${angle}deg)`;
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   document.querySelectorAll(".circlegraph").forEach((circlegraph) => {
+  //     let circles = circlegraph.querySelectorAll(".circleA, .circleB");
+  //     let angle = 360 - 90,
+  //       dangle = 360 / circles.length;
+  //     angle -= dangle;
+  //     for (let i = 0; i < circles.length; ++i) {
+  //       let circle = circles[i];
+  //       angle += dangle;
+  //       circle.style.transform = `rotate(${angle}deg) translate(${
+  //         circlegraph.clientWidth / 2
+  //       }px) rotate(-${angle}deg)`;
+  //     }
+  //   });
+  // }, []);
   return (
     <>
       <ReportHeader text="Pay Period" />
-      <Text className="subsection">Remaining Punch Items </Text>
+      <Recordables />
+      {/* <Text className="subsection">Remaining Punch Items </Text>
       <Subdivider />
       <div className="upp-wrapper">
         <div className="circlegraph">
@@ -53,7 +54,7 @@ export const PayPeriod = ({ lots }) => {
       </div>
       <div className="punch-items-wrapper overflow-wrapper">
         <Recordables />
-      </div>
+      </div> */}
       <Text className="subsection">This Pay Period Work Orders</Text>
       <Accordion allowMultiple className="wo-accordion overflow-wrapper">
         <WorkOrderData lots={lots} />
