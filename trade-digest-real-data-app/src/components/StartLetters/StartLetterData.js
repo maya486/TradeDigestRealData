@@ -9,6 +9,7 @@ import { format, toDate, parseISO } from "date-fns";
 import { FiExternalLink } from "react-icons/fi";
 import { LinkBox, LinkOverlay, Text, Icon } from "@chakra-ui/react";
 import { vendor_id } from "../../VendorLogic";
+import { TbLetterR } from "react-icons/tb";
 
 export const StartLetterData = ({ lots }) => {
   const {
@@ -146,3 +147,16 @@ const StartLetterHO = ({
     </div>
   );
 };
+
+//  Vendor Id                   firebase
+//    ||                          ||
+//  developments                lots
+//        \\                    //
+//          \\                //
+//              Start Letter
+//             //        \\
+//     house order        \\
+//          ||             url
+//    plan elevation       //
+//           \\          //
+//       Complete Start Letter UI

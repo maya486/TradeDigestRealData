@@ -48,7 +48,7 @@ export const TwoWeekActivities = ({ activities, setLots }) => {
           format(endOfWeek(this_week), "MMM d")
         }
       />
-      <div className="overflow-wrapper">
+      <div>
         <GetWeekActivities filtered={firstWeek?.filtered || []} />
       </div>
       <TimelineNode
@@ -59,7 +59,7 @@ export const TwoWeekActivities = ({ activities, setLots }) => {
           format(endOfWeek(next_week), "MMM d")
         }
       />
-      <div className="overflow-wrapper">
+      <div>
         <GetWeekActivities filtered={secondWeek?.filtered || []} />
       </div>
       <TimelineNode

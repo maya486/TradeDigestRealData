@@ -71,7 +71,7 @@ export const Notifications = () => {
   return (
     <>
       <ReportHeader text="Notifications" />
-      <div className="overflow-wrapper">
+      <div>
         <div className="notifs">
           {woaAccordion}
           {docAccordion}
@@ -187,7 +187,7 @@ const DOC = ({ notif, time }) => {
 const NotifAccordion = ({ data, icon_type, title }) => {
   const { now } = useDates();
   return (
-    <Accordion allowToggle>
+    <Accordion allowToggle className="overflow-wrapper">
       <AccordionItem borderBottom="None" borderTop="None">
         <h2>
           <AccordionButton css={{ margin: "0", padding: "0" }}>
