@@ -21,7 +21,7 @@ export const Notifications = () => {
   const { now } = useDates();
   var notifs = [];
   const woa = WorkOrderApprovals();
-  var woaAccordion = <></>;
+  var woaAccordion = null;
   if (woa.length > 3) {
     woaAccordion = (
       <NotifAccordion
@@ -34,7 +34,7 @@ export const Notifications = () => {
     notifs = notifs.concat(woa);
   }
   const wou = WorkOrderUpdates();
-  var wouAccordion = <></>;
+  var wouAccordion = null;
   if (wou.length > 3) {
     wouAccordion = (
       <NotifAccordion
@@ -47,7 +47,7 @@ export const Notifications = () => {
     notifs = notifs.concat(wou);
   }
   const doc = DocData();
-  var docAccordion = <></>;
+  var docAccordion = null;
   if (doc.length > 3) {
     docAccordion = (
       <NotifAccordion
@@ -61,9 +61,9 @@ export const Notifications = () => {
   }
   if (
     notifs.length === 0 &&
-    woaAccordion === <></> &&
-    wouAccordion === <></> &&
-    docAccordion === <></>
+    woaAccordion === null &&
+    wouAccordion === null &&
+    docAccordion === null
   ) {
     return <NoNotifs />;
   }
