@@ -20,7 +20,6 @@ export const DocData = () => {
 
   if (dev_loading) return <p>Loading...</p>;
   if (dev_error) {
-    console.log(dev_error.message);
     return <p>{dev_error.message}</p>;
   }
   const res = [];
